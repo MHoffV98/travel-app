@@ -330,9 +330,32 @@ function haversineKm(a, b) {
 const delayMin = (sched, actual) => (sched && actual) ? Math.round((new Date(actual) - new Date(sched)) / 60000) : null;
 
 // ---------------------------------------------------------------------------
+// In the Vercel build only: pull any flight export uploaded from the app (stored
+// in the private Blob store at inputs/*.csv) into data/, so a publish/rebuild
+// ingests it. Local runs (the code machine) use data/ as-is. Robust — any failure
+// (no store connected, no token, network) falls back to whatever's in data/.
+async function pullCloudInputs() {
+  if (!process.env.VERCEL) return;
+  let blob;
+  try { blob = await import("@vercel/blob"); } catch { return; }
+  try {
+    const { blobs } = await blob.list({ prefix: "inputs/" });
+    for (const b of blobs) {
+      const name = b.pathname.split("/").pop();
+      if (!/^(flighty|fr24)\.csv$/.test(name)) continue;
+      const g = await blob.get(b.pathname, { access: "private" });
+      if (g && g.statusCode === 200) {
+        fs.writeFileSync(path.join(DATA, name), await new Response(g.stream).text());
+        console.log(`[cloud] pulled ${name} from Blob (app upload)`);
+      }
+    }
+  } catch (e) { console.log(`[cloud] inputs skipped: ${e.message}`); }
+}
+
 // Main
 // ---------------------------------------------------------------------------
 async function main() {
+  await pullCloudInputs();
   const flightyFile = newestFile(["^FlightyExport.*\\.csv$", "^flighty\\.csv$"]);
   const fr24File = newestFile(["^flightdiary.*\\.csv$", "^fr24\\.csv$"]);
   const manualFile = path.join(DATA, "manual_trips.csv");
