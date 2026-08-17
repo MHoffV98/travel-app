@@ -1,0 +1,12 @@
+{
+  "_readme": "Hand-edited. Keys are a country's recommendations_key (lowercase, hyphenated name, e.g. 'new-zealand'). Each value is a list of your own tips. Edit freely – the pipeline never overwrites this file.",
+  "singapore": [
+    "Hawker centres for dinner – Maxwell or Lau Pa Sat",
+    "Gardens by the Bay after dark for the light show"
+  ],
+  "australia": [
+    "Great Ocean Road drive out of Melbourne",
+    "Lord Howe Island if you can get a permit"
+  ],
+  "japan": []
+}

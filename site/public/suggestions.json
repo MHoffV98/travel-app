@@ -1,0 +1,20 @@
+{
+  "generated": "2026-06-14",
+  "note": "Hand-picked by Claude from your travel history – regenerate any time by asking in a session.",
+  "suggestions": [
+    { "name": "Kyoto & the Nakasendo (Kiso Valley)", "country": "Japan", "lat": 35.34, "lon": 137.6, "reason": "You love a rail journey and great food – walk the old post-road between mountain towns by train and on foot.", "tags": ["rail", "food", "mountains", "city", "culture"] },
+    { "name": "Tbilisi & Svaneti", "country": "Georgia", "lat": 43.0, "lon": 42.7, "reason": "The Caucasus is the wilder cousin of your Albania and Uzbekistan trips – ancient towers, big trekking, and natural wine.", "tags": ["mountains", "offbeat", "food", "wine", "trek"] },
+    { "name": "Petra & Wadi Rum", "country": "Jordan", "lat": 30.32, "lon": 35.44, "reason": "You glimpsed the River Jordan from the West Bank – the country itself rewards with rose-rock canyons and desert camps like your Sahara nights.", "tags": ["desert", "history", "wild", "warm"] },
+    { "name": "Seoul & Jeju Island", "country": "South Korea", "lat": 37.57, "lon": 126.98, "reason": "A food-obsessed megacity plus a volcanic island to ferry out to – your kind of city-and-coast combo.", "tags": ["city", "food", "island"] },
+    { "name": "Taipei & Taroko Gorge", "country": "Taiwan", "lat": 24.17, "lon": 121.49, "reason": "Night-market feasts then marble-walled gorge hikes – a tidy mix of the things you gravitate to in Asia.", "tags": ["food", "mountains", "city"] },
+    { "name": "Sossusvlei & Etosha (self-drive)", "country": "Namibia", "lat": -22.5, "lon": 16.5, "reason": "You like a road trip and you've done the Sahara – swap it for red dunes and a self-drive safari.", "tags": ["road", "wildlife", "desert", "wild"] },
+    { "name": "Song-Köl & the Tien Shan", "country": "Kyrgyzstan", "lat": 41.84, "lon": 75.13, "reason": "Yurts, horses and high passes – the natural next step after the Aral Sea and Samarkand.", "tags": ["mountains", "offbeat", "road", "trek"] },
+    { "name": "Rio & Chapada Diamantina", "country": "Brazil", "lat": -13.0, "lon": -41.5, "reason": "The big gap in an otherwise complete South America – beach city energy plus waterfall-and-plateau trekking.", "tags": ["city", "beach", "mountains", "trek"] },
+    { "name": "Salar de Uyuni & La Paz", "country": "Bolivia", "lat": -20.13, "lon": -67.49, "reason": "The mirror-flat salt desert is an easy, spectacular add to your Andean run through Peru, Chile and Argentina.", "tags": ["mountains", "offbeat", "road", "desert"] },
+    { "name": "Stockholm & the archipelago", "country": "Sweden", "lat": 59.33, "lon": 18.07, "reason": "Nordic design city plus thousands of islands to ferry between – like the Greek isles, but pine and timber.", "tags": ["city", "island", "rail", "design"] },
+    { "name": "Palawan & Siargao", "country": "Philippines", "lat": 9.84, "lon": 118.74, "reason": "Island-hopping, lagoons and reefs to follow the Maldives and Indonesia – barefoot and boat-bound.", "tags": ["island", "beach", "diving", "warm"] },
+    { "name": "Lalibela & the Simien Mountains", "country": "Ethiopia", "lat": 12.03, "lon": 39.04, "reason": "Rock-hewn churches and gelada-dotted highlands – deeply off the beaten track, the way you like Africa.", "tags": ["history", "mountains", "offbeat", "wild"] },
+    { "name": "Kathmandu & the Annapurna foothills", "country": "Nepal", "lat": 28.6, "lon": 84.0, "reason": "Himalayan trekking with the same pull as El Chaltén and Theth – teahouse trails and giant peaks.", "tags": ["mountains", "trek", "offbeat"] },
+    { "name": "The Gobi & Orkhon Valley", "country": "Mongolia", "lat": 46.86, "lon": 103.84, "reason": "Overland across the steppe, sleeping in gers – remote and road-trippy, a true frontier after Central Asia.", "tags": ["road", "offbeat", "wild", "desert"] }
+  ]
+}

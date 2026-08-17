@@ -1,0 +1,17 @@
+{
+  "name": "travel-map",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "npm install --prefix site",
+    "data": "node pipeline/build_data.js",
+    "dev": "npm run data && npm --prefix site run dev",
+    "build": "npm run data && npm --prefix site run build",
+    "preview": "npm --prefix site run preview",
+    "deploy": "npm run build && npx --yes vercel deploy --prod --yes"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.3.0"
+  }
+}

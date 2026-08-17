@@ -1,0 +1,179 @@
+country,start_date,end_date,date_precision,transport,type,notes,place,lat,lon,nights,trip
+Mauritius,1999-08,,month,flight,visit,"childhood trip, pre-records",,,,7,
+France,2002-07,2016-08,recurring,car/ferry,visit,summer childhood trips to Horsarrieu (Landes) 2002-2016,Horsarrieu,43.6586,-0.7089,156,
+Barbados,2005-10,,month_approx,flight,visit,"single trip with St Kitts, Oct 2005",,,,5,
+Saint Kitts and Nevis,2005-10,,month_approx,ship,visit,same trip as Barbados,,,,3,
+Egypt,2006,,month,flight,visit,Egypt holiday 2006 (~7 nights),,,,7,
+United States,2007-10-08,,day_approx,flight,visit,New York,New York,40.7128,-74.0060,,us-2007
+United States,2007-10-12,,day_approx,train,visit,return train to Boston,Boston,42.3601,-71.0589,,us-2007
+United States,2007-10-14,,day_approx,train,visit,back to New York,New York,40.7128,-74.0060,,us-2007
+France,2009-07-12,,day_approx,car,visit,summer at Horsarrieu — drove down to Spain,Horsarrieu,43.6586,-0.7089,7,
+Spain,2009-07-15,,day_approx,car,visit,drove to San Sebastian from Horsarrieu,San Sebastian,43.3183,-1.9812,,
+Iceland,2009-12,,month,flight,visit,first visit (Reykjavik),Reykjavik,64.1466,-21.9426,,
+Switzerland,2010-03,,month_approx,flight,visit,Geneva Motor Show weekend,Geneva,46.2044,6.1432,2,
+Belgium,2010-06,,month_approx,train,visit,Bruges (2 nights),Bruges,51.2093,3.2247,2,
+Italy,2010-10-17,2010-10-18,day_approx,flight,visit,"flew into Venice, embarked cruise",Venice,45.4408,12.3155,,cruise-2010
+Egypt,2010-10-21,2010-10-21,day_approx,cruise,visit,Alexandria cruise port day,Alexandria,31.2001,29.9187,,cruise-2010
+Israel,2010-10-23,2010-10-24,day_approx,cruise,visit,Haifa port day,Haifa,32.7940,34.9896,,cruise-2010
+Israel,2010-10-23,,day_approx,road,visit,drove to Jerusalem from Haifa,Jerusalem,31.7683,35.2137,,
+Palestine,2010-10-24,2010-10-24,day_approx,road,visit,River Jordan (West Bank) excursion,River Jordan,31.8370,35.5200,,
+Greece,2010-10-25,2010-10-26,day_approx,cruise,visit,"Piraeus / Athens, 2 days",Piraeus,37.9420,23.6469,,cruise-2010
+Croatia,2010-10-28,2010-10-28,day_approx,cruise,visit,Split port day,Split,43.5081,16.4402,,cruise-2010
+Italy,2010-10-29,2010-10-29,day_approx,cruise,visit,disembarked Venice,Venice,45.4408,12.3155,,cruise-2010
+Russia,2013-02-01,,day_approx,flight,visit,Moscow,Moscow,55.7558,37.6173,6,russia-2013
+Russia,2013-02-07,,day_approx,train,visit,St Petersburg (train from Moscow),St Petersburg,59.9311,30.3609,4,russia-2013
+Morocco,2013-04-05,,day_approx,flight,visit,flew into Marrakesh,Marrakesh,31.6295,-7.9811,13,morocco-2013
+Morocco,2013-04-07,,day_approx,car,visit,drove to Ouarzazate,Ouarzazate,30.9189,-6.8934,,morocco-2013
+Algeria,2013-04-09,,day_approx,foot,visit,hiked from Ouarzazate to the Algerian border (and back),Algeria border,30.2000,-5.0000,1,morocco-2013
+Morocco,2013-04-11,,day_approx,foot,visit,hiked back to Zagora,Zagora,30.3325,-5.8386,,morocco-2013
+Morocco,2013-04-13,,day_approx,car,visit,drove back to Marrakesh to fly home,Marrakesh,31.6295,-7.9811,,morocco-2013
+Iceland,2013-06,,month,flight,visit,second visit (Reykjavik),Reykjavik,64.1466,-21.9426,,
+Morocco,2018-09-06,,day_approx,road,visit,Merzouga (Sahara dunes) during 2018 trip,Merzouga,31.0997,-4.0124,,
+Morocco,2018-09-09,,day_approx,car,visit,Chefchaouen — the blue city,Chefchaouen,35.1688,-5.2636,,
+United States,2014-04,,month,flight,visit,"New York, Easter 2014 (unlogged flight)",New York,40.7128,-74.0060,,
+Cuba,2015-10,,month,flight,visit,unlogged flight,,,,8,
+Hungary,2016-07-24,2016-07-28,day,train,visit,"interrail — Budapest, 4 nights",Budapest,47.4979,19.0402,,interrail-2016
+Austria,2016-07-28,2016-07-31,day,train,visit,"interrail — Vienna, 3 nights",Vienna,48.2082,16.3738,,interrail-2016
+Germany,2016-07-31,2016-08-03,day,train,visit,"interrail — Munich, 3 nights",Munich,48.1351,11.5820,,interrail-2016
+Czech Republic,2016-08-03,2016-08-07,day,train,visit,"interrail — Prague, 4 nights",Prague,50.0755,14.4378,,interrail-2016
+Germany,2016-08-07,2016-08-11,day,train,visit,"interrail — Berlin, 4 nights",Berlin,52.5200,13.4050,,interrail-2016
+Netherlands,2016-08-11,2016-08-16,day,train,visit,"interrail — Amsterdam, 5 nights",Amsterdam,52.3676,4.9041,,interrail-2016
+Vatican City,2018-09-18,2018-09-18,day_approx,walk,visit,day trip from Rome during Sep 2018 Italy trip,Vatican City,41.9022,12.4539,,
+Thailand,2019-12-03,,day_approx,road,visit,Chiang Mai — overland to Laos,Chiang Mai,18.7883,98.9853,,
+Laos,2019-12-05,2019-12-07,day_approx,road,visit,Luang Prabang — arrived overland from Thailand,Luang Prabang,19.8845,102.1348,2,
+Vietnam,2019-12-16,,day_approx,road,visit,Saigon — overland bus to Cambodia,Ho Chi Minh City,10.8231,106.6297,,
+Cambodia,2019-12-17,2019-12-20,day_approx,road,visit,arrived overland from Vietnam (bus via Phnom Penh),Siem Reap,13.3671,103.8448,3,
+Switzerland,2020-08,,month,car,transit,drove through,,,,,
+Mexico,2022-04-08,,day_approx,road,visit,San Cristobal de las Casas,San Cristobal,16.7370,-92.6376,2,centam-2022
+Guatemala,2022-04-15,,day_approx,road,visit,Flores (gateway to Tikal),Flores,16.9280,-89.8920,4,centam-2022
+Belize,2022-04-21,2022-04-28,day,road,visit,mainly Caye Caulker,Caye Caulker,17.7380,-88.0250,7,centam-2022
+Mexico,2022-04-28,,day_approx,road,visit,crossed back to Mexico (Tulum),Tulum,20.2110,-87.4660,1,centam-2022
+Argentina,2024-01-03,,day,ferry,visit,Buquebus ferry across to Uruguay,Buenos Aires,-34.6037,-58.3816,,arg-uru-2024
+Uruguay,2024-01-03,2024-01-04,day,ferry,visit,ferry from Buenos Aires; 1 night in Montevideo,Montevideo,-34.9011,-56.1645,,arg-uru-2024
+France,2024-06,,month_approx,train,visit,Paris by Eurostar (2 nights),Paris,48.8566,2.3522,2,
+France,2024-10-30,2024-11-03,day,train,visit,Champagne / Reims by train (30 Oct–3 Nov 2024),Reims,49.2583,4.0317,3,
+Belgium,2024-12-17,,day_approx,train,visit,Bruges (2 nights),Bruges,51.2093,3.2247,2,
+Monaco,2024-05-26,2024-05-26,day_approx,train,visit,"Monaco GP day trip by train from Nice, May 2024",Monaco,43.7384,7.4246,,
+France,2025-11-15,,day_approx,train,visit,Paris by Eurostar (2 nights),Paris,48.8566,2.3522,2,
+Akrotiri and Dhekelia,2025-01-02,,day,car,visit,drove into the UK Sovereign Base Area,Akrotiri,34.5900,32.9900,,
+Northern Cyprus,2025-01-04,,day,foot,visit,walked across the Green Line in Nicosia,North Nicosia,35.1900,33.3600,,,
+Netherlands,2026-04-27,,day,train,visit,Eurostar from Amsterdam,Amsterdam,52.3676,4.9041,,ams-lon-2026
+United Kingdom,2026-04-27,,day,train,visit,Eurostar Amsterdam to London,London,51.5074,-0.1278,,ams-lon-2026
+Cuba,2015-10-01,,day_approx,flight,visit,Havana,Havana,23.1136,-82.3666,,cuba-2015
+Cuba,2015-10-03,,day_approx,car,visit,Cienfuegos,Cienfuegos,22.1460,-80.4360,,cuba-2015
+Cuba,2015-10-04,,day_approx,car,visit,Trinidad,Trinidad,21.8030,-79.9844,,cuba-2015
+Cuba,2015-10-06,,day_approx,car,visit,Varadero,Varadero,23.1394,-81.2861,,cuba-2015
+United Kingdom,2007-07-18,,day_approx,car,visit,drove to Dover for the ferry,Dover,51.1295,1.3089,,france-2007
+France,2007-07-18,,day_approx,ferry,visit,ferry Dover to Calais,Calais,50.9581,1.8526,,france-2007
+France,2007-07-20,,day_approx,car,visit,via Poitiers,Poitiers,46.5802,0.3404,,france-2007
+France,2007-07-22,2007-09-02,day_approx,car,visit,summer at Horsarrieu,Horsarrieu,43.6586,-0.7089,44,france-2007
+France,2009-03,,month_approx,ferry,visit,Normandy (ferry from Portsmouth Mar 2009),Caen,49.1829,-0.3707,,
+France,2025-05-30,,day_approx,car,visit,Carcassonne at the end of the May trip,Carcassonne,43.2130,2.3491,,
+Argentina,2024-02-05,,day_approx,road,visit,El Chalten (trekking),El Chalten,-49.3314,-72.8864,,
+Uruguay,2024-01-04,,day_approx,bus,visit,bus to Punta del Este,Punta del Este,-34.9606,-54.9509,,
+Bulgaria,2022-02-24,,day_approx,road,visit,Sapareva Banya,Sapareva Banya,42.2833,23.2667,,bulgaria-2022
+Bulgaria,2022-02-25,,day_approx,road,visit,Rila Lakes,Rila Lakes,42.2100,23.3200,,bulgaria-2022
+Bulgaria,2022-02-26,,day_approx,road,visit,Plovdiv,Plovdiv,42.1354,24.7453,,bulgaria-2022
+Uzbekistan,2026-04-19,,day_approx,road,visit,drove to the Aral Sea at Muynak,Muynak,43.7667,59.0167,,
+Uzbekistan,2026-04-20,,day_approx,car,visit,Khiva,Khiva,41.3783,60.3639,2,
+Uzbekistan,2026-04-22,,day_approx,rail,visit,Bukhara,Bukhara,39.7747,64.4286,2,
+Uzbekistan,2026-04-24,,day_approx,rail,visit,Samarkand,Samarkand,39.6270,66.9750,2,
+Turkey,2026-04-25,,day_approx,car,visit,quick trip to Ephesus on the connection,Ephesus,37.9398,27.3417,,
+New Zealand,2023-01-01,,day_approx,car,visit,Auckland on arrival,Auckland,-36.8485,174.7633,1,
+New Zealand,2023-01-02,,day_approx,car,visit,Coromandel,Coromandel,-36.7627,175.4980,1,
+New Zealand,2023-01-03,,day_approx,car,visit,Tauranga,Tauranga,-37.6878,176.1651,1,
+New Zealand,2023-01-04,,day_approx,car,visit,Rotorua,Rotorua,-38.1368,176.2497,1,
+New Zealand,2023-01-05,,day_approx,car,visit,back to Auckland,Auckland,-36.8485,174.7633,,
+New Zealand,2023-01-06,,day_approx,car,visit,Queenstown,Queenstown,-45.0312,168.6626,2,
+New Zealand,2023-01-08,,day_approx,car,visit,Milford Sound,Milford Sound,-44.6414,167.8974,1,
+New Zealand,2023-01-10,,day_approx,car,visit,Wanaka,Wanaka,-44.7032,169.1321,2,
+New Zealand,2023-01-12,,day_approx,car,visit,Hokitika,Hokitika,-42.7167,170.9667,1,
+New Zealand,2023-01-15,,day_approx,car,visit,Christchurch,Christchurch,-43.5321,172.6362,2,
+Greece,2021-09-14,,day_approx,ferry,visit,Paros,Paros,37.0853,25.1500,,greece-2021
+Greece,2021-09-15,,day_approx,ferry,visit,Antiparos,Antiparos,37.0386,25.0814,,greece-2021
+Greece,2021-09-16,,day_approx,ferry,visit,Ios,Ios,36.7236,25.2814,,greece-2021
+Spain,2019-07-15,,day_approx,car,visit,drove to Vigo (from Porto trip),Vigo,42.2406,-8.7207,,
+Albania,2022-06-04,,day_approx,road,visit,Shkodra,Shkodra,42.0683,19.5126,,albania-2022
+Albania,2022-06-05,,day_approx,road,visit,Theth (mountains),Theth,42.3933,19.7681,,albania-2022
+Albania,2022-06-07,,day_approx,road,visit,Berat,Berat,40.7058,19.9522,,albania-2022
+Albania,2022-06-09,,day_approx,road,visit,Gjirokaster,Gjirokaster,40.0758,20.1389,,albania-2022
+Albania,2022-06-10,,day_approx,road,visit,Sarande,Sarande,39.8756,20.0053,,albania-2022
+Albania,2022-06-11,,day_approx,road,visit,Dhermi,Dhermi,40.1497,19.6411,,albania-2022
+Australia,2025-11-30,,day_approx,road,visit,Bendigo (car/train),Bendigo,-36.7570,144.2794,,
+Australia,2025-12-14,2025-12-17,day,road,visit,Bendigo (car/train),Bendigo,-36.7570,144.2794,,
+Australia,2025-12-23,2025-12-29,day,road,visit,Bendigo (car/train),Bendigo,-36.7570,144.2794,,
+Australia,2026-01-08,2026-01-21,day,road,visit,Bendigo (car/train),Bendigo,-36.7570,144.2794,,
+Australia,2026-01-22,2026-01-26,day,car,visit,Kangaroo Island,Kangaroo Island,-35.7800,137.2100,,
+Spain,2025-08-14,,day_approx,train,visit,train to San Sebastian from France (Aug 2025),San Sebastian,43.3183,-1.9812,,
+United Kingdom,2015-06,,approx_year,train,visit,Bristol (multiple visits since 2015),Bristol,51.4545,-2.5879,,
+United Kingdom,2024-06,,approx_year,train,visit,Bath,Bath,51.3811,-2.3590,,
+United Kingdom,2024-06,,approx_year,car,visit,Porthleven,Porthleven,50.0853,-5.3140,,
+United Kingdom,2021-05-28,,day_approx,train,visit,"St Ives — May bank holiday, train from London",St Ives,50.2084,-5.4805,,
+United Kingdom,2017-04,,month_approx,car,visit,Brecon (Easter),Brecon,51.9485,-3.3925,,
+United Kingdom,2017-07,,month_approx,car,visit,Brecon (summer),Brecon,51.9485,-3.3925,,
+United Kingdom,2018-06,,approx_year,car,visit,Bridgend,Bridgend,51.5046,-3.5769,,
+United Kingdom,2015-06,,approx_year,car,visit,Tighnabruaich,Tighnabruaich,55.9180,-5.2270,,
+United Kingdom,2018-03,,month_approx,train,visit,Cambridge (first visit; more since),Cambridge,52.2053,0.1218,,
+United Kingdom,2024-09,,month_approx,train,visit,Margate,Margate,51.3815,1.3866,,
+United Kingdom,2015-06,,approx_year,car,visit,Chester,Chester,53.1934,-2.8931,,
+United Kingdom,2018-06,,approx_year,car,visit,Portmeirion,Portmeirion,52.9128,-4.0987,,
+Portugal,2026-07-24,2026-07-27,day,flight,visit,Madeira (3 nights between flights),Funchal,32.6669,-16.9241,3,
+Slovenia,2026-07-28,2026-07-30,day_approx,car,visit,Soča valley (drove from Venice),Bovec,46.3383,13.5522,2,
+Slovenia,2026-07-30,2026-08-01,day_approx,car,visit,Lake Bled,Bled,46.3683,14.1146,2,
+Italy,2026-08-01,2026-08-02,day_approx,car,visit,Italian Dolomites (Cortina d'Ampezzo),Cortina d'Ampezzo,46.5369,12.1360,1,
+United Kingdom,2007-06,,approx_year,car,visit,Lake District (annually 2007-13),Lake District,54.4609,-3.0886,,
+Hungary,2024-07-19,,day_approx,train,visit,Budapest by train across the border (Hungarian GP + birthday),Budapest,47.4979,19.0402,,
+United Kingdom,2014-07-11,,day_approx,train,visit,T in the Park (Balado) — train to Glasgow + coach,Balado,56.2200,-3.5500,,
+United Kingdom,2015-07-10,,day_approx,train,visit,T in the Park (Strathallan) — train to Glasgow + coach,Strathallan,56.3200,-3.7300,,
+Ghana,2019-09-28,,day_approx,car,visit,Cape Coast for the final weekend,Cape Coast,5.1053,-1.2466,,
+Rwanda,2019-08-19,,day_approx,car,visit,Kigali on arrival,Kigali,-1.9441,30.0619,2,
+Rwanda,2019-08-21,,day_approx,car,visit,Byumba,Byumba,-1.5763,30.0675,1,
+Rwanda,2019-08-22,,day_approx,car,visit,Akagera National Park,Akagera,-1.8866,30.7944,2,
+Rwanda,2019-08-24,,day_approx,car,visit,Muhanga,Muhanga,-2.0780,29.7560,1,
+Rwanda,2019-08-25,,day_approx,car,visit,Gisenyi (Lake Kivu),Gisenyi,-1.7028,29.2564,2,
+Rwanda,2019-08-28,,day_approx,car,visit,back to Kigali,Kigali,-1.9441,30.0619,,
+Peru,2019-10-11,,day_approx,car,visit,road south to Paracas,Paracas,-13.8350,-76.2509,,
+Peru,2019-10-12,,day_approx,car,visit,Huacachina oasis,Huacachina,-14.0875,-75.7626,,
+Peru,2019-10-14,,day_approx,car,visit,Arequipa,Arequipa,-16.4090,-71.5375,,
+Peru,2019-10-17,,day_approx,car,visit,Cusco,Cusco,-13.5320,-71.9675,,
+Peru,2019-10-19,,day_approx,foot,visit,Salkantay trek to Machu Picchu (4 days),Machu Picchu,-13.1631,-72.5450,,
+Colombia,2019-10-25,,day_approx,car,visit,a week in Medellin on arrival,Medellin,6.2442,-75.5812,6,
+Colombia,2019-10-30,,day_approx,car,visit,Cartagena,Cartagena,10.3910,-75.4794,2,
+Colombia,2019-11-02,,day_approx,car,visit,Barranquilla,Barranquilla,10.9685,-74.7813,1,
+Colombia,2019-11-03,,day_approx,car,visit,Santa Marta,Santa Marta,11.2408,-74.1990,2,
+Colombia,2019-11-05,,day_approx,car,visit,Taganga,Taganga,11.2671,-74.1880,2,
+Colombia,2019-11-07,,day_approx,car,visit,Tayrona park,Tayrona,11.3000,-74.0500,1,
+Colombia,2019-11-08,,day_approx,car,visit,Palomino,Palomino,11.2479,-73.5664,1,
+Colombia,2019-11-09,,day_approx,car,visit,Cabo de la Vela,Cabo de la Vela,12.2206,-72.1583,2,
+Colombia,2019-11-11,,day_approx,car,visit,back to Santa Marta,Santa Marta,11.2408,-74.1990,2,
+Colombia,2019-11-13,,day_approx,car,visit,Bogotá — last night before flying out,Bogota,4.7110,-74.0721,1,
+Sri Lanka,2019-11-20,,day_approx,rail,visit,scenic train to Ella,Ella,6.8667,81.0466,,
+Sri Lanka,2019-11-23,,day_approx,car,visit,Unawatuna beach,Unawatuna,6.0094,80.2497,,
+Sri Lanka,2019-11-25,,day_approx,car,visit,Galle,Galle,6.0535,80.2210,,
+Sri Lanka,2019-11-27,,day_approx,car,visit,back to Colombo,Colombo,6.9271,79.8612,,
+Mexico,2022-03-25,,day_approx,car,visit,Cancun on arrival,Cancun,21.1619,-86.8515,1,centam-2022
+Mexico,2022-03-26,,day_approx,ferry,visit,Isla Holbox,Holbox,21.5217,-87.3787,3,centam-2022
+Mexico,2022-03-29,,day_approx,car,visit,Valladolid,Valladolid,20.6896,-88.2012,2,centam-2022
+Mexico,2022-03-31,,day_approx,car,visit,Merida,Merida,20.9674,-89.5926,2,centam-2022
+Mexico,2022-04-02,,day_approx,car,visit,Mexico City,Mexico City,19.4326,-99.1332,3,centam-2022
+Mexico,2022-04-05,,day_approx,car,visit,Oaxaca,Oaxaca,17.0732,-96.7266,2,centam-2022
+Guatemala,2022-04-11,,day_approx,car,visit,Lake Atitlan,Lake Atitlan,14.7402,-91.1577,2,centam-2022
+Guatemala,2022-04-12,,day_approx,car,visit,Antigua Guatemala,Antigua,14.5586,-90.7295,2,centam-2022
+Guatemala,2022-04-13,,day_approx,foot,visit,Volcan Acatenango overnight hike,Acatenango,14.5006,-90.8763,1,centam-2022
+Mexico,2022-04-29,,day_approx,car,visit,drove back to Cancun for the flight home,Cancun,21.1619,-86.8515,1,centam-2022
+Spain,1999-05,,month_approx,flight,visit,Mallorca — mum & I stayed while Dad went to the '99 Champions League final,Palma,39.5696,2.6502,3,
+Spain,2025-05-21,,day_approx,road,visit,drove to Bilbao for the Europa League final,Bilbao,43.2630,-2.9350,,
+Greece,2009-08-27,,day_approx,flight,visit,flew into Athens for the wedding weekend,Athens,37.9838,23.7275,,
+Greece,2009-08-28,,day_approx,ferry,visit,ferry to Mykonos — sister's wedding,Mykonos,37.4467,25.3289,3,
+United Kingdom,2026-05-22,,day_approx,car,visit,drove GLA to Acharacle,Acharacle,56.7400,-5.7900,,
+United Kingdom,2026-05-23,,day_approx,car,visit,Isle of Skye,Isle of Skye,57.4100,-6.2000,,
+United Kingdom,2026-05-26,,day_approx,car,visit,Clashnessie (NW Highlands),Clashnessie,58.2200,-5.3300,,
+United Kingdom,2026-05-30,,day_approx,car,visit,Balmoral,Balmoral,57.0400,-3.2300,,
+Oman,2024-12-07,,day_approx,car,visit,Muscat (2 nights),Muscat,23.5880,58.4080,2,
+Oman,2024-12-09,,day_approx,car,visit,Nizwa (1 night),Nizwa,22.9330,57.5300,1,
+Oman,2024-12-10,,day_approx,car,visit,Sur (1 night),Sur,22.5700,59.5290,1,
+Oman,2024-12-11,,day_approx,car,visit,Wahiba Sands desert camp (1 night),Wahiba Sands,21.9000,58.8000,1,
+Oman,2024-12-12,,day_approx,car,visit,back to Muscat,Muscat,23.5880,58.4080,,
+Netherlands,2015-07-31,2015-08-03,day,train+flight,visit,"Amsterdam long weekend — train from London, flew home to Manchester",Amsterdam,52.3676,4.9041,3,
+United Arab Emirates,2009-12-25,2010-01-01,day_approx,flight,visit,Dubai over Christmas & New Year,Dubai,25.2048,55.2708,7,
+United Arab Emirates,2015-05-22,2015-05-29,day_approx,flight,visit,Dubai — a week in late May,Dubai,25.2048,55.2708,7,

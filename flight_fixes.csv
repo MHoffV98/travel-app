@@ -1,0 +1,22 @@
+action,date,route,flight,note
+add_to_fr24,2023-03-27,SYD-MEL,"QF475 17:30, B738",missing from FR24
+add_to_fr24,2024-02-16,BOS-LGA,"DL2265 12:30, A220",missing from FR24
+add_to_fr24,2025-11-08,LHR-CDG,"BA302 07:20, A319",missing from FR24
+add_to_fr24,2025-11-09,ORY-LGW,"VY6948 19:00, A320neo",missing from FR24
+add_to_fr24,2026-07-24,LGW-FNC,BA2716 08:10 (future),optional - booked flight
+add_to_flighty,2024-01-27,EZE-SCL,see FR24 for details,missing from Flighty
+fix_date_fr24,2018-08-22 -> 2018-09-22,NAP-MXP + MXP-MAN,U22888 / U22921,FR24 has wrong month (proven by LIS-VCE 11 Sep in both)
+fix_date_fr24,2018-08-24 -> 2018-09-24,MAN-FAO,FR9122,FR24 has wrong month
+fix_date_flighty,2019-11-19 -> 2019-11-18,MAN-AMS,KL1070 05:55,Flighty date impossible: its own AMS-BOM is 18 Nov
+check_date,2017-07-31 or 2017-08-01,SPU-MAN,LS916 12:55,"daytime flight, sources differ by 1 day - check booking email"
+check_trip,2025-05-31,STN-TLS / TLS-STN,FR281 19:10 out + FR282 same day,Flighty has out+back same evening (impossible); FR24 missing outbound - fix dates in both
+adjudicate,2025-07-18,LCY-LIN (Flighty) vs STN-GOA (FR24),BA221 10:40 vs FR972 06:40,"different flights - keep the one you flew, fix other app"
+adjudicate,2025-11-24/25,SIN-MEL,QF36 24th 20:15 vs QF38 25th 00:05,different flights - keep correct one
+adjudicate,2024-10-03,LGW-BGO,DY1319 21:00 vs DY1315 08:50,different flights same day
+adjudicate,2019-10-25,LIM-MDE,LA146? 12:14 vs FC359 19:35,different flights
+adjudicate,2019-10-30,MDE-CTG,4292 19:25 vs VH8076 13:30,different flights
+adjudicate,2019-12-15,DAD-SGN,VN141 20:00 vs VN151 15:00,different flights
+adjudicate,2024-01-01,SCL-EZE,LA477 16:22 vs LA657 18:07,different flights
+adjudicate,2025-04-22,VCE-STN,FR793 23:30 vs FR799 21:35,different flights
+no_action,2019-02-11,TXL/BER-EDI,Flighty TXL is historically correct,FR24 remapped after Tegel closed - pipeline handles
+no_action,2019-08-29,KGL-EBB-AMS,KL539 both legs,"NOT a duplicate - same flight number, two legs"

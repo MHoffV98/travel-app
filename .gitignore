@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+site/node_modules/
+
+# build output
+site/dist/
+site/dist-prod/
+
+# vercel
+.vercel/
+
+# local env / secrets
+.env
+.env.*
+*.local
+
+# os / editor
+.DS_Store
+Thumbs.db
+*.log

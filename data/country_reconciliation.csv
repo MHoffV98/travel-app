@@ -1,0 +1,74 @@
+country,status,first_flight_touch,last_flight_touch,arrivals,action_needed
+Albania,confirmed_flight_visit,2022-06-03,2022-06-13,1.0,
+Argentina,confirmed_flight_visit,2024-01-01,2024-02-09,6.0,
+Australia,confirmed_flight_visit,2022-06-30,2026-02-01,95.0,
+Austria,confirmed_flight_visit,2024-07-18,2024-07-22,1.0,
+Belgium,confirmed_flight_visit,2016-07-24,2016-07-24,1.0,
+Bulgaria,confirmed_flight_visit,2022-02-23,2022-02-27,1.0,
+Cambodia,confirmed_flight_visit,2019-12-20,2019-12-20,0.0,
+Chile,confirmed_flight_visit,2023-11-15,2024-01-27,10.0,
+Colombia,confirmed_flight_visit,2019-10-25,2019-11-14,3.0,
+Croatia,confirmed_flight_visit,2017-07-27,2017-08-01,1.0,
+Cyprus,confirmed_flight_visit,2025-01-01,2025-01-05,1.0,
+Estonia,confirmed_flight_visit,2024-05-04,2024-05-06,1.0,
+Fiji,confirmed_flight_visit,2023-07-08,2023-07-15,1.0,
+France,confirmed_flight_visit,2016-07-24,2025-11-09,14.0,
+Germany,confirmed_flight_visit,2017-08-07,2021-11-21,3.0,
+Ghana,confirmed_flight_visit,2019-09-15,2019-10-03,1.0,
+Greece,confirmed_flight_visit,2020-07-30,2021-09-19,2.0,
+Hong Kong,confirmed_flight_visit,2025-08-26,2025-09-10,2.0,layover visit - exited airport
+Hungary,confirmed_flight_visit,2016-07-24,2017-09-25,2.0,
+Iceland,confirmed_flight_visit,2021-11-09,2021-11-11,1.0,
+Indonesia,confirmed_flight_visit,2017-12-12,2023-07-08,4.0,
+Italy,confirmed_flight_visit,2018-08-22,2025-08-25,10.0,
+Laos,confirmed_flight_visit,2019-12-07,2019-12-07,0.0,
+Maldives,confirmed_flight_visit,2020-12-16,2020-12-22,1.0,
+Malta,confirmed_flight_visit,2025-05-01,2025-05-05,1.0,
+Mexico,confirmed_flight_visit,2022-03-25,2022-04-30,2.0,
+Morocco,confirmed_flight_visit,2018-09-02,2018-09-11,2.0,
+Netherlands,confirmed_flight_visit,2016-08-16,2026-04-25,12.0,
+New Caledonia,confirmed_flight_visit,2023-07-17,2023-07-22,1.0,
+New Zealand,confirmed_flight_visit,2023-01-01,2023-01-17,2.0,
+Norway,confirmed_flight_visit,2024-10-03,2024-10-13,7.0,
+Oman,confirmed_flight_visit,2024-12-07,2024-12-15,1.0,
+Peru,confirmed_flight_visit,2019-10-09,2023-11-19,3.0,
+Poland,confirmed_flight_visit,2018-03-18,2018-03-22,1.0,
+Portugal,confirmed_flight_visit,2018-08-24,2022-03-23,5.0,
+Qatar,confirmed_flight_visit,2024-12-06,2024-12-15,2.0,layover visit - exited airport
+Romania,confirmed_flight_visit,2025-09-27,2025-10-04,1.0,
+Rwanda,confirmed_flight_visit,2019-08-19,2019-08-29,1.0,
+Singapore,confirmed_flight_visit,2023-07-08,2026-02-01,4.0,layover visit - exited airport
+Spain,confirmed_flight_visit,2020-01-20,2025-03-04,4.0,
+Sri Lanka,confirmed_flight_visit,2019-11-19,2019-11-28,1.0,
+Thailand,confirmed_flight_visit,2019-11-29,2026-01-03,5.0,
+Turkey,confirmed_flight_visit,2019-09-08,2026-04-25,3.0,
+United Arab Emirates,confirmed_flight_visit,2017-12-11,2020-12-23,4.0,
+United Kingdom,confirmed_flight_visit,2016-08-16,2026-05-31,64.0,
+United States,confirmed_flight_visit,2024-02-09,2025-04-27,8.0,
+Uruguay,confirmed_flight_visit,2024-01-04,2024-01-04,0.0,
+Uzbekistan,confirmed_flight_visit,2026-04-16,2026-04-25,2.0,
+Vanuatu,confirmed_flight_visit,2023-07-15,2023-07-17,1.0,
+Vietnam,confirmed_flight_visit,2019-12-07,2019-12-15,3.0,
+Canada,transit_only_confirmed,2022-03-25,2022-04-30,2.0,
+India,transit_only_confirmed,2019-11-18,2019-11-19,1.0,
+Ireland,transit_only_confirmed,2017-09-25,2017-09-25,1.0,
+Malaysia,transit_only_confirmed,2019-11-28,2019-11-29,1.0,
+Panama,transit_only_confirmed,2019-10-09,2019-10-09,1.0,
+Uganda,transit_only_confirmed,2019-08-29,2019-08-29,1.0,
+Algeria,pre2016_trip,,,,"add approx year; overland, pre-2016"
+Barbados,pre2016_trip,,,,add approx year
+Belize,overland_crossing,,,,"overland (from Mexico, 2022) - add approx date"
+Cuba,pre2016_trip,,,,add approx year
+Czech Republic,pre2016_trip,,,,add approx year
+Egypt,pre2016_trip,,,,add approx year
+Guatemala,overland_crossing,,,,"overland (from Mexico/Belize, 2022) - add approx date"
+Israel,pre2016_trip,,,,add approx year
+Mauritius,pre2016_trip,,,,add approx year
+Monaco,been_only_no_flight,,,,add approx date + transport mode
+Palestine,pre2016_trip,,,,"add approx year; overland, pre-2016"
+Russia,pre2016_trip,,,,add approx year
+Saint Kitts and Nevis,pre2016_trip,,,,add approx year
+Svalbard,been_only_no_flight,,,,add approx date + transport mode
+Switzerland,pre2016_trip,,,,add approx year
+Vatican City,overland_crossing,,,,overland (from Italy) - add approx date
+Svalbard,confirmed_flight_visit,2024-10-10,2024-10-13,1.0,pipeline: map LYR to Svalbard not Norway
