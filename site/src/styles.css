@@ -603,6 +603,13 @@ nav { flex-wrap: wrap; justify-content: flex-end; }
 .ai-preview.bad { background: rgba(255,120,120,0.08); border-color: rgba(255,120,120,0.3); }
 .ai-preview code { background: rgba(255,255,255,0.1); padding: 1px 5px; border-radius: 4px; }
 .ai-dl { align-self: flex-start; margin-top: 2px; background: rgba(120,220,255,0.14); border: 1px solid rgba(120,220,255,0.4); color: #9fe4ff; border-radius: 9px; padding: 7px 13px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.ai-cloud { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.ai-cloud-up, .ai-cloud-pub { border: none; border-radius: 9px; padding: 8px 15px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.ai-cloud-up { background: rgba(120,220,255,0.16); border: 1px solid rgba(120,220,255,0.45); color: #9fe4ff; }
+.ai-cloud-pub { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #1a1206; }
+.ai-cloud-up:disabled, .ai-cloud-pub:disabled { opacity: 0.55; cursor: default; }
+.ai-cloud-msg { font-size: 12.5px; color: var(--accent); }
+.ai-cloud-msg.bad { color: #fca5a5; }
 .add-sub { margin: 18px 0 0; font-size: 14px; font-family: var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
 .add-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 12px; margin: 10px 0 16px; padding: 16px; background: var(--panel); border: 1px solid var(--panel-border); border-radius: 14px; }
 .add-form label { display: flex; flex-direction: column; gap: 4px; }

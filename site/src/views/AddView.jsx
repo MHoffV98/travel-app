@@ -22,11 +22,13 @@ export default function AddView() {
   // filename. Flights aren't appended row-by-row — the pipeline reads the whole
   // export, so the flow is: drop the file into data/ and publish.
   const [imp, setImp] = useState(null);
+  const [cloud, setCloud] = useState({ status: "idle", msg: "" }); // idle|uploading|uploaded|publishing|published|error
   const fileRef = useRef(null);
   const onImport = async (e) => {
     const file = e.target.files?.[0]; if (!file) return;
     const text = await file.text();
     setImp({ ...detectFlightCsv(text), name: file.name, text });
+    setCloud({ status: "idle", msg: "" });
     if (fileRef.current) fileRef.current.value = "";
   };
   const downloadFlights = () => {
@@ -35,6 +37,26 @@ export default function AddView() {
     const u = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = u; a.download = nm; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(u), 1000);
+  };
+  // Phone-friendly path: upload the export to the cloud, then publish (rebuild).
+  const uploadToCloud = async () => {
+    if (!imp?.source) return;
+    setCloud({ status: "uploading", msg: "" });
+    try {
+      const r = await fetch("/api/upload-flights", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind: imp.source, csv: imp.text }) });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && j.ok) setCloud({ status: "uploaded", msg: `Uploaded ${imp.count} flights to the cloud. Hit Publish to make it live.` });
+      else setCloud({ status: "error", msg: j.message || "Upload failed — is the Blob store connected?" });
+    } catch (e) { setCloud({ status: "error", msg: String(e.message || e) }); }
+  };
+  const publish = async () => {
+    setCloud((c) => ({ ...c, status: "publishing", msg: "" }));
+    try {
+      const r = await fetch("/api/publish", { method: "POST" });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && j.ok) setCloud({ status: "published", msg: "Publishing — the site rebuilds and goes live in ~1 minute. Refresh then." });
+      else setCloud({ status: "error", msg: j.message || "Publish failed." });
+    } catch (e) { setCloud({ status: "error", msg: String(e.message || e) }); }
   };
 
   const commit = (next) => { setRows(next); savePending(next); };
@@ -75,7 +97,18 @@ export default function AddView() {
             {imp.source ? (
               <>
                 <div>Detected <b>{imp.source === "fr24" ? "FR24" : "Flighty"}</b> · {imp.count} flights{imp.first ? ` · ${imp.first} → ${imp.last}` : ""}</div>
-                <div className="muted small">Save it as <code>{imp.source === "fr24" ? "fr24.csv" : "flighty.csv"}</code> into <code>data/</code>, then <code>npm run deploy</code>. Future-dated flights show as “booked” automatically.</div>
+                <div className="ai-cloud">
+                  <button className="ai-cloud-up" disabled={cloud.status === "uploading" || cloud.status === "publishing"} onClick={uploadToCloud}>
+                    {cloud.status === "uploading" ? "Uploading…" : "☁ Upload to cloud"}
+                  </button>
+                  {(cloud.status === "uploaded" || cloud.status === "publishing" || cloud.status === "published") && (
+                    <button className="ai-cloud-pub" disabled={cloud.status === "publishing"} onClick={publish}>
+                      {cloud.status === "publishing" ? "Publishing…" : "🚀 Publish"}
+                    </button>
+                  )}
+                </div>
+                {cloud.msg && <div className={`ai-cloud-msg ${cloud.status === "error" ? "bad" : ""}`}>{cloud.msg}</div>}
+                <div className="muted small">Or, from the code machine: save it as <code>{imp.source === "fr24" ? "fr24.csv" : "flighty.csv"}</code> into <code>data/</code> and <code>npm run deploy</code>. Future-dated flights show as “booked” automatically.</div>
                 <button className="ai-dl" onClick={downloadFlights}>Download as {imp.source === "fr24" ? "fr24.csv" : "flighty.csv"}</button>
               </>
             ) : <div>Couldn’t recognise <b>{imp.name}</b> as a Flighty or FR24 export.</div>}

@@ -1,6 +1,6 @@
 # Discrepancy report
 
-Built 2026-08-09. Flighty 307 · FR24 300 · merged 307 (304 flown, 2 booked, 1 cancelled).
+Built 2026-08-17. Flighty 307 · FR24 300 · merged 307 (304 flown, 2 booked, 1 cancelled).
 
 ## Section-2 correction checks
 
