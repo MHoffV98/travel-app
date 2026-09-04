@@ -654,6 +654,7 @@ nav { flex-wrap: wrap; justify-content: flex-end; }
   .wish-add input:first-child { flex: 1 1 100%; }
   .wish-add .wish-country { flex: 1 1 auto; }
 }
+.wish-add button:disabled { opacity: 0.45; cursor: default; }
 .wish-add input:focus { outline: none; border-color: var(--accent); }
 .wish-add button, .wish-suggest { border: none; border-radius: 9px; cursor: pointer; font: inherit; font-weight: 600; color: #1a1206; background: linear-gradient(135deg, var(--accent), var(--accent2)); padding: 9px 16px; }
 .wish-suggest:disabled { opacity: 0.6; cursor: default; }

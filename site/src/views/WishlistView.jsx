@@ -32,8 +32,11 @@ export default function WishlistView() {
   const patch = (id, p) => commit(list.map((x) => (x.id === id ? { ...x, ...p } : x)));
 
   const addManual = () => {
-    if (!name.trim()) return;
-    add({ name: name.trim(), country: country.trim() });
+    const place = name.trim(), ctry = country.trim();
+    if (!place && !ctry) return;
+    // A country on its own is a perfectly good wishlist entry — don't require a
+    // specific place. With only a country, that becomes the entry's name.
+    add(place ? { name: place, country: ctry } : { name: ctry });
     setName(""); setCountry("");
   };
 
@@ -70,7 +73,7 @@ export default function WishlistView() {
       <div className="wish-add">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Add a place… (e.g. Kyoto)" onKeyDown={(e) => e.key === "Enter" && addManual()} />
         <input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country" className="wish-country" onKeyDown={(e) => e.key === "Enter" && addManual()} />
-        <button onClick={addManual}>Add</button>
+        <button onClick={addManual} disabled={!name.trim() && !country.trim()}>Add</button>
       </div>
 
       {list.length === 0 && <p className="wish-empty">Nothing on the list yet. Add a place above, or ask for ideas below.</p>}
