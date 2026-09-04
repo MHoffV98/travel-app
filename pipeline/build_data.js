@@ -334,35 +334,49 @@ const delayMin = (sched, actual) => (sched && actual) ? Math.round((new Date(act
 // in the private Blob store at inputs/*.csv) into data/, so a publish/rebuild
 // ingests it. Local runs (the code machine) use data/ as-is. Robust — any failure
 // (no store connected, no token, network) falls back to whatever's in data/.
+// Returns the set of filenames actually pulled (e.g. {"flighty.csv"}), so the build
+// can prefer them outright over anything committed in data/.
 async function pullCloudInputs() {
-  if (!process.env.VERCEL) return;
+  const pulled = new Set();
+  if (!process.env.VERCEL) { console.log("[cloud] local build — using data/ as-is"); return pulled; }
   let blob;
-  try { blob = await import("@vercel/blob"); } catch { return; }
+  try { blob = await import("@vercel/blob"); }
+  catch (e) { console.log(`[cloud] @vercel/blob unavailable: ${e.message}`); return pulled; }
   try {
     const { blobs } = await blob.list({ prefix: "inputs/" });
+    console.log(`[cloud] Blob inputs/ holds: ${blobs.map(b => b.pathname).join(", ") || "(nothing)"}`);
     for (const b of blobs) {
       const name = b.pathname.split("/").pop();
       if (!/^(flighty|fr24)\.csv$/.test(name)) continue;
       const g = await blob.get(b.pathname, { access: "private" });
       if (g && g.statusCode === 200) {
-        fs.writeFileSync(path.join(DATA, name), await new Response(g.stream).text());
-        console.log(`[cloud] pulled ${name} from Blob (app upload)`);
+        const text = await new Response(g.stream).text();
+        fs.writeFileSync(path.join(DATA, name), text);
+        pulled.add(name);
+        console.log(`[cloud] pulled ${name} — ${text.length} bytes, uploaded ${b.uploadedAt}`);
+      } else {
+        console.log(`[cloud] ${name}: unexpected status ${g && g.statusCode}`);
       }
     }
+    if (!pulled.size) console.log("[cloud] no app-uploaded exports — using data/ as committed");
   } catch (e) { console.log(`[cloud] inputs skipped: ${e.message}`); }
+  return pulled;
 }
 
 // Main
 // ---------------------------------------------------------------------------
 async function main() {
-  await pullCloudInputs();
-  const flightyFile = newestFile(["^FlightyExport.*\\.csv$", "^flighty\\.csv$"]);
-  const fr24File = newestFile(["^flightdiary.*\\.csv$", "^fr24\\.csv$"]);
+  const pulled = await pullCloudInputs();
+  // An export uploaded from the app always wins over whatever is committed in data/.
+  const pick = (name, patterns) => pulled.has(name) ? path.join(DATA, name) : newestFile(patterns);
+  const flightyFile = pick("flighty.csv", ["^FlightyExport.*\\.csv$", "^flighty\\.csv$"]);
+  const fr24File = pick("fr24.csv", ["^flightdiary.*\\.csv$", "^fr24\\.csv$"]);
   const manualFile = path.join(DATA, "manual_trips.csv");
   const reconFile = path.join(DATA, "country_reconciliation.csv");
   if (!flightyFile || !fr24File) throw new Error("Missing flight exports in data/");
-  log(`Flighty: ${path.basename(flightyFile)}`);
-  log(`FR24:    ${path.basename(fr24File)}`);
+  const flightySource = path.basename(flightyFile) + (pulled.has("flighty.csv") ? " (uploaded from the app)" : "");
+  log(`Flighty: ${flightySource}`);
+  log(`FR24:    ${path.basename(fr24File)}${pulled.has("fr24.csv") ? " (uploaded from the app)" : ""}`);
 
   const airports = await loadAirports();
   const iso3of = name => ISO3[name] || null;
@@ -860,7 +874,16 @@ async function main() {
   // -------------------------------------------------------------------------
   const cleanFlights = flights.map(({ _toCountryName, _depTime, _arrTime, _arrivalTransit, ...f }) => f);
   const out = {
-    meta: { built: BUILD_DATE, flight_count: flown.length, share_mode: false },
+    // built_at / source let the app show exactly which export the live site was
+    // built from, so an upload+publish can be confirmed rather than guessed at.
+    meta: {
+      built: BUILD_DATE,
+      built_at: new Date().toISOString(),
+      flight_count: flown.length,
+      source: flightySource,
+      last_flight: cleanFlights.reduce((m, f) => (f.date > m ? f.date : m), ""),
+      share_mode: false,
+    },
     flights: cleanFlights,
     visits,
     countries,

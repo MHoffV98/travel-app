@@ -1,7 +1,10 @@
 {
   "meta": {
-    "built": "2026-08-17",
-    "flight_count": 304,
+    "built": "2026-09-04",
+    "built_at": "2026-09-04T09:24:55.667Z",
+    "flight_count": 305,
+    "source": "FlightyExport-2026-07-13.csv",
+    "last_flight": "2026-09-06",
     "share_mode": false
   },
   "flights": [
@@ -11684,7 +11687,7 @@
       "registration": null,
       "seat": null,
       "cabin": null,
-      "status": "booked",
+      "status": "flown",
       "sources": [
         "flighty"
       ]
@@ -15378,9 +15381,9 @@
       "name": "Italy",
       "status": "visited",
       "first_visit": "2010-10-17",
-      "last_visit": "2026-08-02",
+      "last_visit": "2026-09-03",
       "first_visit_precision": "day_approx",
-      "visit_count": 9,
+      "visit_count": 10,
       "visit_years": [
         "2010",
         "2018",
@@ -15399,7 +15402,8 @@
         "2025-04-18",
         "2025-07-18",
         "2025-08-22",
-        "2026-07-28"
+        "2026-07-28",
+        "2026-09-03"
       ],
       "cities": 9,
       "nights": 33,
@@ -16216,14 +16220,14 @@
       "name": "United Kingdom",
       "status": "visited",
       "first_visit": "1998-07-20",
-      "last_visit": "2026-08-02",
+      "last_visit": "2026-09-03",
       "first_visit_precision": "day",
       "visit_count": 0,
       "is_home": true,
       "is_current_home": true,
       "cities": 25,
-      "nights": 2319,
-      "home_nights": 9649,
+      "nights": 2351,
+      "home_nights": 9666,
       "transports": [
         "flight",
         "train",
@@ -16378,14 +16382,14 @@
     }
   ],
   "stats": {
-    "flights_flown": 304,
-    "flights_booked": 2,
+    "flights_flown": 305,
+    "flights_booked": 1,
     "flights_cancelled": 1,
-    "distance_km": 622474,
-    "times_around_earth": 15.53,
+    "distance_km": 624066,
+    "times_around_earth": 15.57,
     "hours_airborne": 970,
     "airports": 142,
-    "airlines": 57,
+    "airlines": 58,
     "aircraft_types": 30,
     "top_routes": [
       [
@@ -16440,7 +16444,7 @@
       ],
       [
         "LGW",
-        24
+        25
       ],
       [
         "STN",
@@ -16496,7 +16500,7 @@
       ],
       [
         "Airbus A320",
-        52
+        53
       ],
       [
         "Airbus A330-200",
@@ -16528,7 +16532,7 @@
       49,
       29,
       30,
-      50,
+      51,
       43,
       40
     ],
@@ -16543,8 +16547,8 @@
     "countries_total": 69,
     "countries_transit_only": 6,
     "layover_visits": 3,
-    "nights_total": 11103,
-    "nights_home": 10199,
+    "nights_total": 11120,
+    "nights_home": 10216,
     "nights_travel": 904,
     "busiest_year": [
       "2023",
@@ -16561,7 +16565,7 @@
       "2023": 82,
       "2024": 48,
       "2025": 31,
-      "2026": 21
+      "2026": 22
     },
     "longest_flight": {
       "route": "SYD→SCL",

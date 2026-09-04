@@ -1,13 +1,77 @@
 // AddView.jsx — capture manual trips/stays on-device and export them as
 // data/manual_trips.csv rows. For flights, just drop a Flighty export into data/
 // and run `npm run deploy` (the pipeline ingests it automatically).
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { data } from "../data.js";
 import { loadPending, savePending, toCsv, detectFlightCsv } from "../addData.js";
+import { getEssentials, saveEssentials } from "../packingStore.js";
 
 const TRANSPORTS = ["flight", "train", "car", "road", "bus", "cruise", "ferry", "walk"];
 const PRECISIONS = [["day", "exact day"], ["day_approx", "approx day"], ["month", "month"], ["month_approx", "approx month"]];
 const BLANK = { country: "", place: "", start_date: "", end_date: "", nights: "", transport: "flight", type: "visit", date_precision: "day", lat: "", lon: "", notes: "", trip: "" };
+
+// The global "things I always forget" list. Managed once here; every packing
+// list generated from now on seeds one item per entry (tagged source:'essentials').
+// Editing it never touches lists that already exist — those are trip history.
+function PackingEssentials() {
+  const [items, setItems] = useState([]);
+  const [adding, setAdding] = useState("");
+  useEffect(() => { getEssentials().then(setItems).catch(() => {}); }, []);
+  const commit = (next) => { setItems(next); saveEssentials(next); };
+  const add = () => {
+    const v = adding.trim();
+    if (!v || items.some((i) => i.toLowerCase() === v.toLowerCase())) { setAdding(""); return; }
+    setAdding("");
+    commit([...items, v]);
+  };
+  return (
+    <div className="pe-box">
+      <h3>Things I always forget</h3>
+      <p className="pe-intro">Seeded into every new packing list. Changing this doesn’t alter lists already attached to a trip.</p>
+      {items.length > 0 && (
+        <div className="pe-list">
+          {items.map((it) => (
+            <span className="pe-chip" key={it}>{it}
+              <button onClick={() => commit(items.filter((x) => x !== it))} aria-label={`Remove ${it}`}>×</button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="pe-add">
+        <input value={adding} placeholder="e.g. phone charger, adapter, medication"
+          onChange={(e) => setAdding(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }} />
+        <button onClick={add} disabled={!adding.trim()}>Add</button>
+      </div>
+    </div>
+  );
+}
+
+// What the running build was actually made from. travel_data.json is bundled at
+// build time, so this line IS the live site's provenance — after a publish +
+// refresh it changes, which is how you confirm an upload actually landed.
+function LiveBuild() {
+  const m = data.meta || {};
+  const when = m.built_at ? new Date(m.built_at) : null;
+  const ago = (() => {
+    if (!when) return m.built || "unknown";
+    const mins = Math.round((Date.now() - when) / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins} min ago`;
+    const h = Math.round(mins / 60);
+    if (h < 24) return `${h} hour${h > 1 ? "s" : ""} ago`;
+    const d = Math.round(h / 24);
+    return `${d} day${d > 1 ? "s" : ""} ago`;
+  })();
+  return (
+    <div className="ai-live">
+      <b>Live data</b>: built {ago}
+      {m.flight_count ? ` · ${m.flight_count} flights` : ""}
+      {m.last_flight ? ` · up to ${m.last_flight}` : ""}
+      {m.source ? <> · from <code>{m.source}</code></> : null}
+    </div>
+  );
+}
 
 export default function AddView() {
   const [rows, setRows] = useState(loadPending);
@@ -54,7 +118,7 @@ export default function AddView() {
     try {
       const r = await fetch("/api/publish", { method: "POST" });
       const j = await r.json().catch(() => ({}));
-      if (r.ok && j.ok) setCloud({ status: "published", msg: "Publishing — the site rebuilds and goes live in ~1 minute. Refresh then." });
+      if (r.ok && j.ok) setCloud({ status: "published", msg: "Publishing — rebuilds and goes live in ~1 min. Refresh, then check the “Live data” line above says the new flight count." });
       else setCloud({ status: "error", msg: j.message || "Publish failed." });
     } catch (e) { setCloud({ status: "error", msg: String(e.message || e) }); }
   };
@@ -87,6 +151,7 @@ export default function AddView() {
       </div>
 
       <div className="add-import">
+        <LiveBuild />
         <div className="ai-head">
           <span><b>Flights</b>: import a Flighty or FR24 export</span>
           <button className="ai-pick" onClick={() => fileRef.current?.click()}>Choose CSV…</button>
@@ -115,6 +180,8 @@ export default function AddView() {
           </div>
         )}
       </div>
+
+      <PackingEssentials />
 
       <h3 className="add-sub">Manual trip / stay</h3>
       <div className="add-form">

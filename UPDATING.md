@@ -13,7 +13,16 @@ Both apps export your **entire** history each time, so you just drop in the late
    (name starting with `flightdiary`, or overwrite `data/fr24.csv`).
 
 The pipeline automatically picks the **newest** matching file, so you don't have to
-delete the old one.
+delete the old one. Precedence, highest first:
+
+1. An export **uploaded from the app** (Add tab → ☁ Upload to cloud). It lands in the
+   Blob store and is pulled into `data/flighty.csv` at build time, and it always wins.
+2. Otherwise the newest `FlightyExport*.csv` in `data/`.
+3. Otherwise `data/flighty.csv` as committed.
+
+Because of rule 1, once you've uploaded from the phone the Blob copy stays the source
+of truth for cloud builds. To go back to a file on the code machine, upload that file
+from the app too (or clear `inputs/flighty.csv` from the Blob store).
 
 ## Add overland / cruise / pre-2016 trips (things flights don't capture)
 
@@ -42,11 +51,44 @@ Both regenerate `site/src/travel_data.json`, build, and deploy to production.
 Check `discrepancy_report.md` after a build if a country count looks off — it lists
 anything the pipeline couldn't reconcile.
 
-### Can I deploy from my phone / a button in the web app?
+### Publishing from your phone
 
-Not directly. The published site is static with no backend, so a browser can't run a
-build or the Vercel CLI. Publishing always happens on the machine with the code (via
-`Deploy.bat` or `npm run deploy`). Deploying from anywhere would need the data committed
-to Git plus a Vercel deploy hook and the pipeline moved into Vercel's build step — a
-larger change. For now: capture trips on any device (the **Add** screen exports the
-rows), then publish from the code machine.
+This works now — the repo is on GitHub, Vercel runs the pipeline in the build, and the
+Add tab can upload an export and trigger a rebuild.
+
+1. Flighty → Export → CSV, then in the app: **Add** → *Choose CSV…* → **☁ Upload to cloud**.
+2. **🚀 Publish**. Vercel rebuilds (~1 min), the pipeline pulls your upload from Blob.
+3. Refresh the app and check the **Live data** line at the top of the Add tab — it shows
+   the build time, flight count, latest flight date and which export it came from.
+   If those numbers didn't move, the publish didn't take.
+
+**If Publish returns an error about the deploy hook**, `DEPLOY_HOOK_URL` isn't set:
+Vercel → Project → Settings → Git → Deploy Hooks → create one on `main`, copy the URL,
+add it as an environment variable named `DEPLOY_HOOK_URL`, then redeploy once so the
+function can see it.
+
+**To debug a publish that appears to do nothing**, open the deployment's build log in
+Vercel and look for the `[cloud]` lines — they say what was in the Blob store, what was
+pulled, and which export the build actually used.
+
+## Packing lists
+
+Each trip can have a packing list, generated once and then attached to that trip
+permanently — it's the record of what you actually took.
+
+- **Make one:** Trips → open a trip → *Packing list*. Confirm the climate (guessed
+  from the destination's latitude and the time of year) and the trip type, then
+  Generate. Everything else — trip length, countries, whether you're driving — is
+  already on the trip record.
+- **Going out / Coming home:** the same list serves both legs. Ticking under
+  *Going out* records what you packed; *Coming home* keeps a separate tick per
+  item, seeded from what went out, so repacking never erases the outbound record.
+  Add souvenirs and laundry on the return leg — they're tagged as added.
+- **Bags and weight:** tag each item personal / cabin / hold and set a rough kg.
+  Enter your airline's limits and each bag turns red when it's over.
+- **Things I always forget:** Add tab → a single global list, seeded into every
+  new packing list. Editing it never touches lists already attached to a trip.
+- Lists sync through the same private Blob store as the photos, and fall back to
+  on-device storage when there's no backend — so they work offline on the plane
+  and sync up when you're back on wifi. Trips finished more than a month ago open
+  read-only (with an *Edit anyway* button), and nothing ever deletes a list.

@@ -7,6 +7,8 @@ import { TRIPS, CAT, countryFlagUrl, fmt, transportCat, loadTripMeta, saveTripMe
 import RouteMap from "../RouteMap.jsx";
 import { downloadTripCard } from "../tripCard.js";
 import { getPhotos, addPhotos, deletePhoto, photoCounts, photoTripKey } from "../photoStore.js";
+import PackingList from "../PackingList.jsx";
+import { packingKeys, packingKey } from "../packingStore.js";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -221,7 +223,7 @@ function StopEditor({ trip }) {
   );
 }
 
-function TripCard({ trip, meta, onMeta, onSelect, onOpenEntity, open, onToggle, photoCount, onCount }) {
+function TripCard({ trip, meta, onMeta, onSelect, onOpenEntity, open, onToggle, photoCount, onCount, hasPacking, onHasList }) {
   const name = (meta.name || "").trim() || trip.defaultName;
   const [sharing, setSharing] = useState(false);
   const share = async () => {
@@ -267,7 +269,7 @@ function TripCard({ trip, meta, onMeta, onSelect, onOpenEntity, open, onToggle, 
           {trip.countries.length > 6 && <span className="trip-more">+{trip.countries.length - 6}</span>}
         </div>
         <div className="trip-main">
-          <div className="trip-title">{trip.upcoming && <span className="trip-upcoming">UPCOMING</span>}{trip.birthday && <span className="trip-cake">🎂</span>}{name}{meta.memories ? <span className="trip-note" title="Has memories">✎</span> : null}{photoCount > 0 ? <span className="trip-note" title={`${photoCount} photo${photoCount > 1 ? "s" : ""}`}>📷</span> : null}</div>
+          <div className="trip-title">{trip.upcoming && <span className="trip-upcoming">UPCOMING</span>}{trip.birthday && <span className="trip-cake">🎂</span>}{name}{meta.memories ? <span className="trip-note" title="Has memories">✎</span> : null}{photoCount > 0 ? <span className="trip-note" title={`${photoCount} photo${photoCount > 1 ? "s" : ""}`}>📷</span> : null}{hasPacking ? <span className="trip-note" title="Has a packing list">🎒</span> : null}</div>
           <div className="trip-sub">{trip.dateLabel}</div>
         </div>
         <div className="trip-meta">
@@ -292,6 +294,7 @@ function TripCard({ trip, meta, onMeta, onSelect, onOpenEntity, open, onToggle, 
             {sharing ? "Building card…" : "📤 Share trip card"}
           </button>
           <TripEditor trip={trip} meta={meta} onChange={(patch) => onMeta(trip.id, patch)} />
+          {!SHARE_MODE && <PackingList trip={trip} onHasList={onHasList} />}
           {!SHARE_MODE && <StopEditor trip={trip} />}
         </div>
       )}
@@ -303,8 +306,10 @@ export default function TripsView({ onSelect, onOpenEntity, focusTrip }) {
   const [openId, setOpenId] = useState(null);
   const [meta, setMeta] = useState(loadTripMeta);
   const [counts, setCounts] = useState({});
+  const [packKeys, setPackKeys] = useState(() => new Set());
 
   useEffect(() => { photoCounts().then(setCounts).catch(() => {}); }, []);
+  useEffect(() => { packingKeys().then(setPackKeys).catch(() => {}); }, []);
 
   // Opened from elsewhere (a country panel, "on this day"…): expand + scroll to it.
   useEffect(() => {
@@ -313,6 +318,7 @@ export default function TripsView({ onSelect, onOpenEntity, focusTrip }) {
     const t = setTimeout(() => document.getElementById(`trip-${focusTrip.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 60);
     return () => clearTimeout(t);
   }, [focusTrip]);
+  const onHasList = (id, yes) => setPackKeys((p) => (yes && !p.has(packingKey(id)) ? new Set(p).add(packingKey(id)) : p));
   const onCount = (id, n) => setCounts((c) => { const k = photoTripKey(id); return c[k] === n ? c : { ...c, [k]: n }; });
 
   const onMeta = (id, patch) => {
@@ -344,6 +350,7 @@ export default function TripsView({ onSelect, onOpenEntity, focusTrip }) {
               key={t.id} trip={t} meta={meta[t.id] || {}} onMeta={onMeta} onSelect={onSelect} onOpenEntity={onOpenEntity}
               open={openId === t.id} onToggle={() => setOpenId(openId === t.id ? null : t.id)}
               photoCount={counts[photoTripKey(t.id)] || 0} onCount={onCount}
+              hasPacking={packKeys.has(packingKey(t.id))} onHasList={onHasList}
             />
           ))}
         </section>
