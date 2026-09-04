@@ -84,8 +84,15 @@ permanently — it's the record of what you actually took.
   *Going out* records what you packed; *Coming home* keeps a separate tick per
   item, seeded from what went out, so repacking never erases the outbound record.
   Add souvenirs and laundry on the return leg — they're tagged as added.
-- **Bags and weight:** tag each item personal / cabin / hold and set a rough kg.
-  Enter your airline's limits and each bag turns red when it's over.
+- **Bags:** you never type a weight or choose a bag. Say how many underseat /
+  cabin / hold bags the fare actually allows, and the app allocates everything —
+  showing how full each bag is and, the useful part on a hand-luggage-only fare,
+  exactly what doesn't fit. Passport, medication, phone and power bank stay in
+  the smallest bag so they're reachable; bulky things go in the biggest. Cabin
+  fills before hold, so an empty hold bag means you didn't need to check one.
+- **Wear it:** when things don't fit, the app works out which bulky items worn
+  through the airport would free enough space, and offers one button to do it.
+  Worn items cost no bag space; the 👕 beside an item toggles it by hand.
 - **Things I always forget:** Add tab → a single global list, seeded into every
   new packing list. Editing it never touches lists already attached to a trip.
 - Lists sync through the same private Blob store as the photos, and fall back to

@@ -4,12 +4,20 @@
 // way home the "Coming home" tab writes a separate `returned` field, seeded from
 // what was packed. Two fields, one items array — so repacking never overwrites
 // the record of what was actually taken.
+//
+// You never type a weight or pick a bag: say which bags the airline allows and
+// the allocation falls out of that, including what doesn't fit.
 import { useEffect, useMemo, useState } from "react";
-import { CLIMATES, TRIP_TYPES, BAGS, generatePackingList, customItem, byCategory, bagTotals, guessClimate, tripLat, tripDays } from "./packing.js";
+import {
+  CLIMATES, TRIP_TYPES, BAG_TYPES, BAG_ORDER, WORN,
+  generatePackingList, customItem, byCategory, allocate, ensureMeasures, wearToFit,
+  guessClimate, tripLat, tripDays,
+} from "./packing.js";
 import { getPackingList, savePackingList, getEssentials } from "./packingStore.js";
 
-const BAG_LABEL = { personal: "Personal", cabin: "Cabin", hold: "Hold" };
 const kg = (n) => `${(Math.round(n * 10) / 10).toFixed(1)}kg`;
+const litres = (n) => `${Math.round(n)}L`;
+const listJoin = (xs) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`);
 const DAY = 86400000;
 
 export default function PackingList({ trip, onHasList }) {
@@ -38,14 +46,15 @@ export default function PackingList({ trip, onHasList }) {
     (async () => {
       const [l, e] = await Promise.all([getPackingList(trip), getEssentials()]);
       if (!live) return;
-      setList(l);
+      const ready = l ? ensureMeasures(l) : null;
+      setList(ready);
       setEssentials(e);
       setLoaded(true);
-      if (l) { setClimate(l.climate); setTripType(l.tripType); onHasList?.(trip.id, true); }
+      if (ready) { setClimate(ready.climate); setTripType(ready.tripType); onHasList?.(trip.id, true); }
       else setClimate(guessClimate(tripLat(trip), started ? new Date(started).getMonth() : NaN));
       // Only open on the return leg once there's actually an outbound pack to
       // come home with — a list generated mid-trip should still start outbound.
-      if (repackWindow && l && l.items.some((i) => i.packed)) setMode("return");
+      if (repackWindow && ready && ready.items.some((i) => i.packed)) setMode("return");
     })();
     return () => { live = false; };
   }, [trip.id]);
@@ -55,31 +64,44 @@ export default function PackingList({ trip, onHasList }) {
     setBusy(true);
     try { await savePackingList(trip, next); } finally { setBusy(false); }
   };
+  // Any change to the bags or the item set re-runs the allocation.
+  const reallocate = (next) => persist({ ...next, items: allocate(next).items });
 
   const generate = async () => {
     if (list && !confirm("Regenerate this list? Everything you've ticked off, and anything you added yourself, will be lost.")) return;
-    const next = generatePackingList(trip, { climate, tripType, essentials, baggageLimits: list?.baggageLimits });
+    const next = generatePackingList(trip, { climate, tripType, essentials, bags: list?.bags });
     await persist(next);
     onHasList?.(trip.id, true);
   };
 
   const patchItem = (id, p) => persist({ ...list, items: list.items.map((i) => (i.id === id ? { ...i, ...p } : i)) });
-  const removeItem = (id) => persist({ ...list, items: list.items.filter((i) => i.id !== id) });
+  const removeItem = (id) => reallocate({ ...list, items: list.items.filter((i) => i.id !== id) });
+  const setBagCount = (type, n) => reallocate({ ...list, bags: { ...list.bags, [type]: Math.max(0, Math.min(9, n)) } });
+  const toggleWorn = (it) => reallocate({
+    ...list,
+    items: list.items.map((i) => (i.id === it.id ? { ...i, bag: i.bag === WORN ? null : WORN, pinned: i.bag !== WORN } : i)),
+  });
   const addItem = () => {
     const label = adding.trim();
     if (!label) return;
     setAdding("");
     // Something added on the return leg is by definition coming home with you.
-    persist({ ...list, items: [...list.items, { ...customItem(label), [field]: true }] });
+    reallocate({ ...list, items: [...list.items, { ...customItem(label), [field]: true }] });
   };
-  const setLimit = (bag, v) => persist({ ...list, baggageLimits: { ...list.baggageLimits, [bag]: v === "" ? null : Number(v) } });
 
   // Starting the return leg: everything that went out is presumed still with you.
   const seedReturn = () => persist({ ...list, items: list.items.map((i) => ({ ...i, returned: i.packed })) });
 
   const field = mode === "return" ? "returned" : "packed";
+  const plan = useMemo(() => (list ? allocate(list) : null), [list]);
   const groups = useMemo(() => (list ? byCategory(list.items) : []), [list]);
-  const totals = useMemo(() => (list ? bagTotals(list.items, mode) : null), [list, mode]);
+  // Only worth computing when something actually failed to fit.
+  const wearFix = useMemo(() => (plan && plan.overflow.length ? wearToFit(list) : null), [plan]);
+  const bagLabel = useMemo(() => {
+    const m = new Map(plan?.bins.map((b) => [b.id, b.label]) || []);
+    m.set(WORN, "Worn");
+    return m;
+  }, [plan]);
   const done = list ? list.items.filter((i) => i[field]).length : 0;
   const returnUntouched = list && mode === "return" && list.items.every((i) => !i.returned) && list.items.some((i) => i.packed);
 
@@ -141,46 +163,98 @@ export default function PackingList({ trip, onHasList }) {
         </div>
       )}
 
-      {totals && (
-        <div className="pk-bags">
-          {BAGS.map((b) => {
-            const limit = list.baggageLimits?.[`${b}Kg`];
-            const over = Number.isFinite(limit) && totals[b] > limit;
+      {/* ---- what the airline lets you take ---- */}
+      <div className="pk-allow">
+        <div className="pk-allow-head">What you're allowed</div>
+        <div className="pk-allow-row">
+          {BAG_ORDER.map((type) => (
+            <div key={type} className="pk-allow-bag">
+              <button disabled={!editable} onClick={() => setBagCount(type, (list.bags[type] || 0) - 1)} aria-label={`One fewer ${BAG_TYPES[type].label}`}>−</button>
+              <div className="pk-allow-n">
+                <b>{list.bags[type] || 0}</b>
+                <span>{BAG_TYPES[type].label}</span>
+                <em>{BAG_TYPES[type].note}</em>
+              </div>
+              <button disabled={!editable} onClick={() => setBagCount(type, (list.bags[type] || 0) + 1)} aria-label={`One more ${BAG_TYPES[type].label}`}>+</button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ---- how it packs ---- */}
+      {plan.bins.length > 0 ? (
+        <div className="pk-bins">
+          {plan.bins.map((b) => {
+            const pctV = Math.min(100, (b.usedL / b.volumeL) * 100);
+            const pctW = Math.min(100, (b.usedKg / b.maxKg) * 100);
+            const tight = pctV > 90 || pctW > 90;
             return (
-              <div key={b} className={"pk-bag" + (over ? " over" : "")}>
-                <span className="pk-bag-name">{BAG_LABEL[b]}</span>
-                <b>{kg(totals[b])}</b>
-                <input type="number" min="0" step="0.5" placeholder="limit" disabled={!editable}
-                  value={limit ?? ""} onChange={(e) => setLimit(`${b}Kg`, e.target.value)} />
-                {over && <span className="pk-over">over by {kg(totals[b] - limit)}</span>}
+              <div key={b.id} className={"pk-bin" + (tight ? " tight" : "")}>
+                <div className="pk-bin-head"><b>{b.label}</b><span>{b.items.length} item{b.items.length === 1 ? "" : "s"}</span></div>
+                <div className="pk-meter"><i style={{ width: `${pctV}%` }} /></div>
+                <div className="pk-bin-nums">{litres(b.usedL)} / {litres(b.volumeL)} space · {kg(b.usedKg)} / {kg(b.maxKg)}</div>
+                <div className="pk-meter thin"><i style={{ width: `${pctW}%` }} /></div>
               </div>
             );
           })}
+        </div>
+      ) : (
+        <div className="pk-nobags">No bags selected — add at least one above to see what fits.</div>
+      )}
+
+      {plan.overflow.length > 0 && (
+        <div className="pk-overflow">
+          <b>{plan.overflow.length} item{plan.overflow.length === 1 ? " doesn't" : "s don't"} fit.</b>{" "}
+          {wearFix?.clears ? (
+            <>
+              Wearing the {listJoin(wearFix.wear.map((i) => i.label.toLowerCase()))} through the airport
+              {" "}frees {litres(wearFix.wear.reduce((n, i) => n + i.volumeL, 0))} and everything fits.
+              {editable && (
+                <button className="pk-wearfix" onClick={() => reallocate(wearFix.list)}>
+                  Wear {wearFix.wear.length === 1 ? "it" : "them"}
+                </button>
+              )}
+            </>
+          ) : wearFix?.wear.length
+            ? "Even wearing the bulky things through the airport wouldn't be enough — you need another bag, or fewer clothes."
+            : "Leave something behind, or take a bigger bag."}
+          <ul>
+            {plan.overflow.map((i) => (
+              <li key={i.id}>
+                {i.label} <span className="pk-size">{litres(i.volumeL)} · {kg(i.weightKg)}</span>
+                {i.wearable && editable && <button onClick={() => toggleWorn(i)}>Wear it</button>}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
       {groups.map((g) => (
         <div key={g.category} className="pk-group">
           <div className="pk-cat">{g.category}</div>
-          {g.items.map((it) => (
-            <div key={it.id} className={"pk-item" + (it[field] ? " done" : "")}>
-              <label className="pk-check">
-                <input type="checkbox" checked={!!it[field]} disabled={!editable}
-                  onChange={(e) => patchItem(it.id, { [field]: e.target.checked })} />
-                <span>{it.label}</span>
-              </label>
-              {it.source === "essentials" && <span className="pk-tag" title="From your always-forget list">always</span>}
-              {it.source === "custom" && <span className="pk-tag custom" title="Added by you">added</span>}
-              <select className="pk-bagsel" value={it.bag || ""} disabled={!editable}
-                onChange={(e) => patchItem(it.id, { bag: e.target.value || null })}>
-                <option value="">—</option>
-                {BAGS.map((b) => <option key={b} value={b}>{BAG_LABEL[b]}</option>)}
-              </select>
-              <input className="pk-wt" type="number" min="0" step="0.05" placeholder="kg" disabled={!editable}
-                value={it.weightKg ?? ""} onChange={(e) => patchItem(it.id, { weightKg: e.target.value === "" ? null : Number(e.target.value) })} />
-              {editable && <button className="pk-del" title="Remove" onClick={() => removeItem(it.id)}>×</button>}
-            </div>
-          ))}
+          {g.items.map((it) => {
+            const where = bagLabel.get(it.bag);
+            return (
+              <div key={it.id} className={"pk-item" + (it[field] ? " done" : "") + (where ? "" : " unplaced")}>
+                <label className="pk-check">
+                  <input type="checkbox" checked={!!it[field]} disabled={!editable}
+                    onChange={(e) => patchItem(it.id, { [field]: e.target.checked })} />
+                  <span>{it.label}</span>
+                </label>
+                {it.source === "essentials" && <span className="pk-tag" title="From your always-forget list">always</span>}
+                {it.source === "custom" && <span className="pk-tag custom" title="Added by you">added</span>}
+                <span className={"pk-where" + (it.bag === WORN ? " worn" : "") + (where ? "" : " none")}
+                  title={where ? `Allocated to ${where}` : "Doesn't fit in the bags you've got"}>
+                  {where || "won't fit"}
+                </span>
+                {it.wearable && editable && (
+                  <button className={"pk-wear" + (it.bag === WORN ? " on" : "")} onClick={() => toggleWorn(it)}
+                    title={it.bag === WORN ? "Put it back in a bag" : "Wear it through the airport"}>👕</button>
+                )}
+                {editable && <button className="pk-del" title="Remove" onClick={() => removeItem(it.id)}>×</button>}
+              </div>
+            );
+          })}
         </div>
       ))}
 
@@ -194,7 +268,14 @@ export default function PackingList({ trip, onHasList }) {
 
       {editable && (
         <div className="pk-foot">
-          <button className="pk-regen" onClick={generate} disabled={busy}>Regenerate from scratch</button>
+          {/* Climate or trip type wrong? Change them here and rebuild the list. */}
+          <select value={climate} onChange={(e) => setClimate(e.target.value)} aria-label="Climate">
+            {CLIMATES.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <select value={tripType} onChange={(e) => setTripType(e.target.value)} aria-label="Trip type">
+            {TRIP_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+          <button className="pk-regen" onClick={generate} disabled={busy}>Regenerate</button>
           <span className="pk-saved">{busy ? "Saving…" : "Saved"}</span>
         </div>
       )}
