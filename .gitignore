@@ -18,3 +18,6 @@ site/dist-prod/
 .DS_Store
 Thumbs.db
 *.log
+
+# local editor / agent tooling
+.claude/
