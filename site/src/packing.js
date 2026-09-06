@@ -15,10 +15,16 @@ export const TRIP_TYPES = ["leisure", "business", "beach", "hiking", "formal"];
 // Bag types, with *usable* capacity — not the gross box volume, since nothing
 // packs to 100%. Sizes follow the common European carrier allowances.
 export const BAG_TYPES = {
-  personal: { label: "Underseat", note: "40×30×20cm", volumeL: 20, maxKg: 7 },
+  // 24L is the owner's actual underseat bag packed to the gross box volume —
+  // cheeky, but it goes in the sizer. Adjust if yours is meaner.
+  personal: { label: "Underseat", note: "40×30×20cm", volumeL: 24, maxKg: 7 },
   cabin: { label: "Cabin", note: "55×40×23cm", volumeL: 40, maxKg: 10 },
   hold: { label: "Hold", note: "checked", volumeL: 90, maxKg: 23 },
 };
+
+// With no hold bag, liquids are capped at 100ml in one clear bag — so the big
+// bottles simply can't come, and the packed size changes accordingly.
+export const TRAVEL_SIZE = [0.12, 0.15];   // [kg, litres] for a 100ml bottle
 export const BAG_ORDER = ["personal", "cabin", "hold"];
 export const WORN = "worn";   // carried on your body — costs no bag space
 
@@ -85,23 +91,25 @@ export function tripDays(trip) {
 }
 
 // ---------------------------------------------------------------------------
-// Templates. Each row: [label, measure, flags?]
-//   measure — a key into M, or an explicit [kg, litres]
+// Templates. Each row: [label, measure, flags?, qty?]
+//   measure — a key into M, or an explicit [kg, litres]; per-unit when qty is set
 //   flags   — "reach" must stay within reach (passport, meds, phone)
 //             "wearable" can be worn through the airport to free up bag space
+//             "liquid" subject to the 100ml rule when there's no hold bag
+//   qty     — countable, so the number is adjustable per trip
+// No paper boarding pass or insurance printout — those live on the phone, so
+// they're a reminder to have them saved rather than something to pack.
 const DOCUMENTS = (opts) => [
   ["Passport", "small", "reach"],
-  ["Boarding passes / tickets", "tiny", "reach"],
-  ["Travel insurance details", "tiny", "reach"],
+  ["Phone — boarding passes, insurance, offline maps saved", [0.2, 0.2], "reach"],
   ["Bank / credit cards", "tiny", "reach"],
   ["Local cash", "tiny", "reach"],
   ...(opts.abroad ? [["Visa / entry permit (if needed)", "tiny", "reach"]] : []),
   ...(opts.driving ? [["Driving licence", "tiny", "reach"]] : []),
-  ["Phone with offline maps + tickets saved", [0.2, 0.2], "reach"],
 ];
 
 const CLIMATE_ITEMS = {
-  hot: [["Sunglasses", "small"], ["Sun hat", "hat", "wearable"], ["Sunscreen", "toiletries"], ["Light long sleeves (sun / mosquitoes)", "shirt", "wearable"], ["Insect repellent", "toiletries"], ["Reusable water bottle", [0.2, 1.0]]],
+  hot: [["Sunglasses", "small"], ["Sun hat", "hat", "wearable"], ["Sunscreen", "toiletries", "liquid"], ["Light long sleeves (sun / mosquitoes)", "shirt", "wearable"], ["Insect repellent", "toiletries", "liquid"], ["Reusable water bottle", [0.2, 1.0]]],
   mild: [["Light jumper", "jumper", "wearable"], ["Packable rain jacket", "rainjacket", "wearable"], ["Umbrella", [0.3, 1.0]]],
   cold: [["Warm coat", "coat", "wearable"], ["Hat, gloves and scarf", [0.3, 2.0], "wearable"], ["Thermal base layer", [0.25, 1.0], "wearable"], ["Fleece / thick jumper", "fleece", "wearable"], ["Warm socks", [0.1, 0.5]]],
   rainy: [["Waterproof jacket", "rainjacket", "wearable"], ["Umbrella", [0.3, 1.0]], ["Waterproof shoes", "boots", "wearable"], ["Dry bag for electronics", [0.1, 0.5]], ["Spare socks", "socks"]],
@@ -112,15 +120,15 @@ const CLIMATE_ITEMS = {
 const TYPE_ITEMS = {
   leisure: [["Book / e-reader", "book"], ["Day bag", [0.3, 2.0]], ["Comfortable walking shoes", "shoes", "wearable"]],
   business: [["Laptop and charger", "laptop", "reach"], ["Suit / smart outfit", [1.0, 6.0]], ["Smart shoes", "shoes", "wearable"], ["Business cards", "tiny"], ["Notebook and pen", [0.2, 0.6]], ["Lanyard / office pass", "tiny", "reach"]],
-  beach: [["Swimwear", "swim"], ["Beach towel", [0.4, 3.0]], ["Flip flops / sandals", "sandals", "wearable"], ["Aftersun", "toiletries"], ["Dry bag", [0.1, 0.5]]],
+  beach: [["Swimwear", "swim"], ["Beach towel", [0.4, 3.0]], ["Flip flops / sandals", "sandals", "wearable"], ["Aftersun", "toiletries", "liquid"], ["Dry bag", [0.1, 0.5]]],
   hiking: [["Hiking boots", "boots", "wearable"], ["Daypack", [0.6, 3.0]], ["Water bottle / bladder", [0.3, 1.5]], ["Blister plasters", "tiny", "reach"], ["Head torch", [0.15, 0.4]], ["Offline maps downloaded", [0, 0]], ["Snacks", [0.3, 1.5], "reach"]],
   formal: [["Formal outfit", [1.2, 7.0]], ["Dress shoes", "shoes", "wearable"], ["Accessories / jewellery", [0.1, 0.3]], ["Garment bag", [0.3, 1.5]], ["Shoe polish / lint roller", [0.1, 0.4]]],
 };
 
 const TOILETRIES = [
-  ["Toothbrush and toothpaste", "toiletries"],
-  ["Deodorant", "toiletries"],
-  ["Shampoo and shower gel", [0.3, 1.0]],
+  ["Toothbrush and toothpaste", "toiletries", "liquid"],
+  ["Deodorant", "toiletries", "liquid"],
+  ["Shampoo and shower gel", [0.3, 1.0], "liquid"],
   ["Razor / shaving kit", [0.15, 0.5]],
   ["Hairbrush", [0.1, 0.4]],
   ["Any prescription medication", [0.1, 0.4], "reach"],
@@ -135,24 +143,24 @@ const TECH = [
   ["Headphones", "headphones", "reach"],
 ];
 
-// Clothing scales with trip length but caps out — past a week you do laundry.
-function clothing(days, climate) {
-  const n = Math.min(days, 7);
+// Clothing counts default to the number of *nights*, not days — you travel in
+// one set and wear it again on the way home. Capped at a week, past which you
+// do laundry. Every count here is adjustable per trip.
+function clothing(nights, climate) {
+  const n = Math.max(1, Math.min(nights, 7));
   const warm = climate === "cold" || climate === "snow";
   const hot = climate === "hot";
-  const tops = Math.max(2, Math.min(days, 6));
-  const bottoms = days <= 3 ? 1 : 2;
-  const mul = (key, k) => [+(M[key][0] * k).toFixed(2), +(M[key][1] * k).toFixed(2)];
+  const bottoms = nights <= 3 ? 1 : 2;
   const out = [
-    [`Underwear ×${n}`, mul("underwear", n)],
-    [`Socks ×${n}`, mul("socks", n)],
-    [`T-shirts / tops ×${tops}`, mul("tshirt", tops)],
-    [`Trousers / bottoms ×${bottoms}`, mul("trousers", bottoms), "wearable"],
+    ["Underwear", "underwear", null, n],
+    ["Socks", "socks", null, n],
+    ["T-shirts / tops", "tshirt", null, n],
+    ["Trousers / bottoms", "trousers", "wearable", bottoms],
     ["Pyjamas / sleepwear", "pyjamas"],
   ];
-  if (hot) out.push([`Shorts ×${bottoms}`, mul("shorts", bottoms)]);
-  if (warm) out.push([`Warm jumpers ×${days <= 4 ? 1 : 2}`, mul("jumper", days <= 4 ? 1 : 2), "wearable"]);
-  if (days > 7) out.push(["Laundry bag / travel detergent", [0.1, 0.5]]);
+  if (hot) out.push(["Shorts", "shorts", null, bottoms]);
+  if (warm) out.push(["Warm jumpers", "jumper", "wearable", nights <= 4 ? 1 : 2]);
+  if (nights > 7) out.push(["Laundry bag / travel detergent", [0.1, 0.5]]);
   return out;
 }
 
@@ -160,16 +168,30 @@ function clothing(days, climate) {
 let seq = 0;
 const mkId = () => `pk-${Date.now().toString(36)}-${(seq++).toString(36)}-${Math.floor(Math.random() * 1e4).toString(36)}`;
 
-function item(category, [label, measure, flags], source = "template") {
-  const [weightKg, volumeL] = Array.isArray(measure) ? measure : M[measure] || M.small;
+function item(category, [label, measure, flags, qty], source = "template") {
+  const unit = Array.isArray(measure) ? measure : M[measure] || M.small;
+  const f = Array.isArray(flags) ? flags : flags ? [flags] : [];
+  const n = Number.isFinite(qty) ? qty : null;
   return {
     id: mkId(), category, label, packed: false, returned: false, source,
-    weightKg, volumeL,
-    reach: flags === "reach" || undefined,          // needs to stay accessible
-    wearable: flags === "wearable" || undefined,    // can be worn to save space
+    // Countable things keep their per-unit size so the quantity can be changed
+    // later without losing what one of them costs.
+    qty: n, unitKg: n ? unit[0] : undefined, unitL: n ? unit[1] : undefined,
+    weightKg: n ? +(unit[0] * n).toFixed(2) : unit[0],
+    volumeL: n ? +(unit[1] * n).toFixed(2) : unit[1],
+    reach: f.includes("reach") || undefined,        // needs to stay accessible
+    wearable: f.includes("wearable") || undefined,  // can be worn to save space
+    liquid: f.includes("liquid") || undefined,      // 100ml rule with no hold bag
     bag: null,                                      // filled in by allocate()
     pinned: false,                                  // true once you move it by hand
   };
+}
+
+// Change how many of a countable item you're taking, rescaling its size.
+export function withQty(it, qty) {
+  const n = Math.max(0, Math.min(30, Math.round(qty)));
+  const unitKg = it.unitKg ?? it.weightKg, unitL = it.unitL ?? it.volumeL;
+  return { ...it, qty: n, unitKg, unitL, weightKg: +(unitKg * n).toFixed(2), volumeL: +(unitL * n).toFixed(2) };
 }
 
 /**
@@ -185,7 +207,7 @@ export function generatePackingList(trip, { climate = "mild", tripType = "leisur
   const push = (cat, list, source) => list.forEach((row) => items.push(item(cat, row, source)));
 
   push("Documents and money", DOCUMENTS({ abroad, driving }));
-  push("Clothing", clothing(days, climate));
+  push("Clothing", clothing(days - 1, climate));
   push("Weather essentials", CLIMATE_ITEMS[climate] || CLIMATE_ITEMS.mild);
   push(`${tripType[0].toUpperCase()}${tripType.slice(1)} essentials`, TYPE_ITEMS[tripType] || TYPE_ITEMS.leisure);
   push("Toiletries and health", TOILETRIES);
@@ -251,6 +273,12 @@ export function bagBins(bags) {
   return bins;
 }
 
+// With no hold bag a full-size bottle simply cannot travel, so liquids pack at
+// 100ml. This is a real change to what fits, not just a warning.
+export function effective(it, noHold) {
+  if (!noHold || !it.liquid) return it;
+  return { ...it, weightKg: Math.min(it.weightKg, TRAVEL_SIZE[0]), volumeL: Math.min(it.volumeL, TRAVEL_SIZE[1]) };
+}
 const fits = (bin, it) => bin.usedL + it.volumeL <= bin.volumeL + 1e-9 && bin.usedKg + it.weightKg <= bin.maxKg + 1e-9;
 const place = (bin, it) => { bin.usedL += it.volumeL; bin.usedKg += it.weightKg; bin.items.push(it.id); };
 
@@ -261,14 +289,19 @@ const place = (bin, it) => { bin.usedL += it.volumeL; bin.usedKg += it.weightKg;
 export function allocate(list) {
   const bins = bagBins(list.bags);
   const byId = new Map(bins.map((b) => [b.id, b]));
+  const noHold = !(Number(list.bags?.hold) > 0);
+  // `items` keeps each item's true size — the travel-size cap is only how big it
+  // is *for this allocation*, so adding a hold bag later restores the full one.
   const items = list.items.map((i) => ({ ...i }));
+  const sized = new Map(items.map((i) => [i.id, effective(i, noHold)]));
+  const size = (it) => sized.get(it.id);
   const overflow = [];
   const worn = [];
 
   const loose = [];
   for (const it of items) {
     if (it.bag === WORN) { worn.push(it); continue; }                  // on your body
-    if (it.pinned && byId.has(it.bag)) { place(byId.get(it.bag), it); continue; }
+    if (it.pinned && byId.has(it.bag)) { place(byId.get(it.bag), size(it)); continue; }
     it.bag = null;
     loose.push(it);
   }
@@ -278,14 +311,15 @@ export function allocate(list) {
   const of = (...types) => bins.filter((b) => types.includes(b.type));
   const accessibleFirst = [...bins];                                  // personal → cabin → hold
   const carryFirst = [...of("cabin"), ...of("hold"), ...of("personal")];
-  const reach = loose.filter((i) => i.reach).sort((a, b) => b.volumeL - a.volumeL);
-  const rest = loose.filter((i) => !i.reach).sort((a, b) => b.volumeL - a.volumeL || b.weightKg - a.weightKg);
+  const bulkFirst = (a, b) => size(b).volumeL - size(a).volumeL || size(b).weightKg - size(a).weightKg;
+  const reach = loose.filter((i) => i.reach).sort(bulkFirst);
+  const rest = loose.filter((i) => !i.reach).sort(bulkFirst);
 
   for (const [group, order] of [[reach, accessibleFirst], [rest, carryFirst]]) {
     for (const it of group) {
-      const bin = order.find((b) => fits(b, it));
-      if (bin) { place(bin, it); it.bag = bin.id; }
-      else overflow.push(it);
+      const bin = order.find((b) => fits(b, size(it)));
+      if (bin) { place(bin, size(it)); it.bag = bin.id; }
+      else overflow.push(size(it));   // report the size it would actually be
     }
   }
 
@@ -320,13 +354,22 @@ export function wearToFit(list, max = 6) {
 // Older lists (and hand-added items) predate the weight/volume estimates.
 export function ensureMeasures(list) {
   if (!list) return list;
-  const items = list.items.map((i) => ({
-    ...i,
-    weightKg: Number.isFinite(i.weightKg) ? i.weightKg : 0.3,
-    volumeL: Number.isFinite(i.volumeL) ? i.volumeL : 1.0,
-    bag: i.bag === WORN || /^(personal|cabin|hold)-\d+$/.test(i.bag || "") ? i.bag : null,
-    pinned: !!i.pinned,
-  }));
+  const items = list.items.map((i) => {
+    const weightKg = Number.isFinite(i.weightKg) ? i.weightKg : 0.3;
+    const volumeL = Number.isFinite(i.volumeL) ? i.volumeL : 1.0;
+    // Counts used to be baked into the label ("Underwear ×7"). Recover them so
+    // older lists get the quantity stepper too.
+    const m = i.qty == null && /\s×\s?(\d+)$/.exec(i.label || "");
+    const qty = i.qty ?? (m ? +m[1] : null);
+    const label = m ? i.label.replace(/\s×\s?\d+$/, "") : i.label;
+    return {
+      ...i, label, weightKg, volumeL, qty,
+      unitKg: i.unitKg ?? (qty ? +(weightKg / qty).toFixed(3) : undefined),
+      unitL: i.unitL ?? (qty ? +(volumeL / qty).toFixed(3) : undefined),
+      bag: i.bag === WORN || /^(personal|cabin|hold)-\d+$/.test(i.bag || "") ? i.bag : null,
+      pinned: !!i.pinned,
+    };
+  });
   const bags = list.bags && BAG_ORDER.some((t) => list.bags[t] != null)
     ? list.bags
     // Pre-allocation lists stored baggageLimits instead; assume the usual pair.

@@ -80,6 +80,12 @@ permanently — it's the record of what you actually took.
   from the destination's latitude and the time of year) and the trip type, then
   Generate. Everything else — trip length, countries, whether you're driving — is
   already on the trip record.
+- **Quantities:** clothing counts default to the number of **nights** (you travel
+  in one set and wear it home), capped at a week. Every countable row has a
+  − N + stepper, and changing it re-runs the allocation immediately.
+- **Liquids:** with no hold bag the 100ml rule applies, so toiletries are sized
+  as travel bottles and the packing maths changes accordingly — not just a
+  warning. Add a hold bag and full-size measurements come straight back.
 - **Going out / Coming home:** the same list serves both legs. Ticking under
   *Going out* records what you packed; *Coming home* keeps a separate tick per
   item, seeded from what went out, so repacking never erases the outbound record.

@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   CLIMATES, TRIP_TYPES, BAG_TYPES, BAG_ORDER, WORN,
-  generatePackingList, customItem, byCategory, allocate, ensureMeasures, wearToFit,
+  generatePackingList, customItem, byCategory, allocate, ensureMeasures, wearToFit, withQty,
   guessClimate, tripLat, tripDays,
 } from "./packing.js";
 import { getPackingList, savePackingList, getEssentials } from "./packingStore.js";
@@ -76,6 +76,7 @@ export default function PackingList({ trip, onHasList }) {
 
   const patchItem = (id, p) => persist({ ...list, items: list.items.map((i) => (i.id === id ? { ...i, ...p } : i)) });
   const removeItem = (id) => reallocate({ ...list, items: list.items.filter((i) => i.id !== id) });
+  const setQty = (it, n) => reallocate({ ...list, items: list.items.map((i) => (i.id === it.id ? withQty(i, n) : i)) });
   const setBagCount = (type, n) => reallocate({ ...list, bags: { ...list.bags, [type]: Math.max(0, Math.min(9, n)) } });
   const toggleWorn = (it) => reallocate({
     ...list,
@@ -102,6 +103,7 @@ export default function PackingList({ trip, onHasList }) {
     m.set(WORN, "Worn");
     return m;
   }, [plan]);
+  const noHold = !(Number(list?.bags?.hold) > 0);
   const done = list ? list.items.filter((i) => i[field]).length : 0;
   const returnUntouched = list && mode === "return" && list.items.every((i) => !i.returned) && list.items.some((i) => i.packed);
 
@@ -202,6 +204,12 @@ export default function PackingList({ trip, onHasList }) {
         <div className="pk-nobags">No bags selected — add at least one above to see what fits.</div>
       )}
 
+      {noHold && plan.bins.length > 0 && (
+        <div className="pk-liquids">
+          No hold bag — liquids have to be 100ml or less in one clear resealable bag.
+          Toiletries below are sized as travel bottles.
+        </div>
+      )}
       {plan.overflow.length > 0 && (
         <div className="pk-overflow">
           <b>{plan.overflow.length} item{plan.overflow.length === 1 ? " doesn't" : "s don't"} fit.</b>{" "}
@@ -241,6 +249,13 @@ export default function PackingList({ trip, onHasList }) {
                     onChange={(e) => patchItem(it.id, { [field]: e.target.checked })} />
                   <span>{it.label}</span>
                 </label>
+                {it.qty != null && (
+                  <span className="pk-qty">
+                    <button disabled={!editable || it.qty <= 0} onClick={() => setQty(it, it.qty - 1)} aria-label={`One fewer ${it.label}`}>−</button>
+                    <b>{it.qty}</b>
+                    <button disabled={!editable} onClick={() => setQty(it, it.qty + 1)} aria-label={`One more ${it.label}`}>+</button>
+                  </span>
+                )}
                 {it.source === "essentials" && <span className="pk-tag" title="From your always-forget list">always</span>}
                 {it.source === "custom" && <span className="pk-tag custom" title="Added by you">added</span>}
                 <span className={"pk-where" + (it.bag === WORN ? " worn" : "") + (where ? "" : " none")}
