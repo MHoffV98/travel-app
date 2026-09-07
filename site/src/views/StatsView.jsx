@@ -121,6 +121,10 @@ function Flag({ c, onSelect }) {
   return <img className="flag" src={url} alt={c.name} title={`${c.name} · first ${c.first_visit}`} onClick={click} onError={(e) => { e.currentTarget.style.display = "none"; }} />;
 }
 
+// The tallest column set the whole strip's height (align-items: flex-end), so a
+// single 20-country year rendered every other year as a column of void. Cap the
+// stack and surface the remainder as a +N chip.
+const MAX_STACK = 3;
 function FirstVisitFlags({ byYear, minY, maxY, onSelect }) {
   const years = [];
   for (let y = minY; y <= maxY; y++) years.push(y);
@@ -128,9 +132,14 @@ function FirstVisitFlags({ byYear, minY, maxY, onSelect }) {
     <div className="flagyears">
       {years.map((y) => {
         const cs = byYear[y] || [];
+        const shown = cs.slice(0, MAX_STACK);
+        const extra = cs.length - shown.length;
         return (
           <div className={`flagcol ${cs.length ? "" : "empty"}`} key={y}>
-            <div className="flagstack">{cs.map((c) => <Flag key={c.iso3} c={c} onSelect={onSelect} />)}</div>
+            <div className="flagstack">
+              {shown.map((c) => <Flag key={c.iso3} c={c} onSelect={onSelect} />)}
+              {extra > 0 && <span className="flag-more" title={cs.slice(MAX_STACK).map((c) => c.name).join(", ")}>+{extra}</span>}
+            </div>
             <div className="flagcount">{cs.length || ""}</div>
             <div className="flagyear">'{String(y).slice(2)}</div>
           </div>
@@ -219,9 +228,11 @@ const RANK_COLS = [
 // (home_nights), otherwise the travelled nights. (The raw `nights` is a
 // flight-gap estimate that's meaningless for a home base.)
 const nightsOf = (c) => (c.is_home && c.home_nights ? c.home_nights : (c.nights || 0));
+const RANK_PREVIEW = 10;
 function CountryTable({ onSelect }) {
   const [key, setKey] = useState("visit_count");
   const [dir, setDir] = useState("desc");
+  const [all, setAll] = useState(false);
   const rows = useMemo(() => {
     const list = data.countries.filter((c) => c.status === "visited");
     return [...list].sort((a, b) => {
@@ -238,7 +249,9 @@ function CountryTable({ onSelect }) {
     if (k === key) setDir((d) => (d === "asc" ? "desc" : "asc"));
     else { setKey(k); setDir(k === "name" ? "asc" : "desc"); }
   };
+  const shown = all ? rows : rows.slice(0, RANK_PREVIEW);
   return (
+   <>
     <div className="ctable-wrap">
       <table className="ctable">
         <thead>
@@ -252,7 +265,7 @@ function CountryTable({ onSelect }) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((c, i) => (
+          {shown.map((c, i) => (
             <tr key={c.iso3} onClick={() => onSelect?.(c.iso3)}>
               <td className="ct-rk">{i + 1}</td>
               <td className="ct-name"><Flag c={c} onSelect={onSelect} /><span className="ct-cn">{c.name}{c.is_current_home ? " 🏠" : ""}</span></td>
@@ -266,6 +279,12 @@ function CountryTable({ onSelect }) {
         </tbody>
       </table>
     </div>
+    {rows.length > RANK_PREVIEW && (
+      <button className="more-btn" onClick={() => setAll((a) => !a)}>
+        {all ? "Show top 10" : `Show all ${rows.length} countries`}
+      </button>
+    )}
+   </>
   );
 }
 
@@ -312,13 +331,17 @@ function milestones() {
   return out;
 }
 
+const STAMP_PREVIEW = 12;
 function Stamps({ onSelect }) {
+  const [all, setAll] = useState(false);
   const list = data.countries
     .filter((c) => c.status === "visited" && c.first_visit)
     .sort((a, b) => a.first_visit.localeCompare(b.first_visit));
+  const shown = all ? list : list.slice(0, STAMP_PREVIEW);
   return (
+   <>
     <div className="stamps">
-      {list.map((c, i) => {
+      {shown.map((c, i) => {
         const url = countryFlagUrl(c, 40);
         return (
           <button className="stamp" key={c.iso3} onClick={() => onSelect?.(c.iso3)} title={`${c.name} · first ${c.first_visit}`} style={{ "--rot": `${((i * 37) % 7) - 3}deg` }}>
@@ -329,6 +352,12 @@ function Stamps({ onSelect }) {
         );
       })}
     </div>
+    {list.length > STAMP_PREVIEW && (
+      <button className="more-btn" onClick={() => setAll((a) => !a)}>
+        {all ? "Show fewer" : `Show all ${list.length} stamps`}
+      </button>
+    )}
+   </>
   );
 }
 

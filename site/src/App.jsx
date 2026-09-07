@@ -29,18 +29,29 @@ const WishlistView = lazy(() => import("./views/WishlistView.jsx"));
 const StatsView = lazy(() => import("./views/StatsView.jsx"));
 const AddView = lazy(() => import("./views/AddView.jsx"));
 import CountryPanel from "./CountryPanel.jsx";
-import OnThisDay from "./OnThisDay.jsx";
 import EntityDetail from "./EntityDetail.jsx";
+import Icon from "./Icon.jsx";
 import { data, SHARE_MODE } from "./data.js";
 
 const VIEWS = [
-  { key: "map", label: "Map", icon: "🗺", C: MapView },
-  { key: "trips", label: "Trips", icon: "🧳", C: TripsView },
-  { key: "wishlist", label: "Wishlist", icon: "★", C: WishlistView },
-  { key: "stats", label: "Stats", icon: "📊", C: StatsView },
+  { key: "map", label: "Map", icon: "map", C: MapView },
+  { key: "trips", label: "Trips", icon: "trips", C: TripsView },
+  { key: "wishlist", label: "Wishlist", icon: "wishlist", C: WishlistView },
+  { key: "stats", label: "Stats", icon: "stats", C: StatsView },
   // capture/export tool — owner-only, hidden from shared/public view
-  ...(SHARE_MODE ? [] : [{ key: "add", label: "Add", icon: "＋", C: AddView }]),
+  ...(SHARE_MODE ? [] : [{ key: "add", label: "Add", icon: "add", C: AddView }]),
 ];
+
+// One set of tab buttons, rendered twice: as a compact pill in the header on
+// desktop, and as a bottom tab bar on phones (thumb reach). CSS hides whichever
+// does not belong at the current width.
+function Tabs({ view, setView }) {
+  return VIEWS.map((v) => (
+    <button key={v.key} className={view === v.key ? "on" : ""} onClick={() => setView(v.key)} aria-current={view === v.key ? "page" : undefined} title={v.label}>
+      <Icon name={v.icon} /><span className="nav-label">{v.label}</span>
+    </button>
+  ));
+}
 
 export default function App() {
   const [view, setView] = useState("map");
@@ -64,13 +75,7 @@ export default function App() {
             Born in England, 1998 · {data.stats.countries_sovereign} countries ({data.stats.countries_total} with territories) · {data.stats.flights_flown} flights{SHARE_MODE ? " · shared" : ""}
           </span>
         </div>
-        <nav>
-          {VIEWS.map((v) => (
-            <button key={v.key} className={view === v.key ? "on" : ""} onClick={() => setView(v.key)} aria-label={v.label} title={v.label}>
-              <span className="nav-ico">{v.icon}</span><span className="nav-label">{v.label}</span>
-            </button>
-          ))}
-        </nav>
+        <nav className="nav-top"><Tabs view={view} setView={setView} /></nav>
       </header>
       <main>
         <ViewBoundary viewKey={view}>
@@ -79,8 +84,8 @@ export default function App() {
           </Suspense>
         </ViewBoundary>
       </main>
+      <nav className="tabbar"><Tabs view={view} setView={setView} /></nav>
       {selectedIso && <CountryPanel iso={selectedIso} onClose={() => setSelectedIso(null)} onOpenTrip={openTrip} onOpenEntity={openEntity} />}
-      <OnThisDay onOpenTrip={openTrip} />
       {entity && <EntityDetail key={entity.kind + entity.value} entity={entity} onClose={() => setEntity(null)} />}
     </div>
   );

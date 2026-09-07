@@ -41,15 +41,47 @@ header {
 .small { font-size: 12px; }
 main { position: relative; flex: 1; min-height: 0; }
 
-nav { display: flex; gap: 3px; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 999px; border: 1px solid var(--panel-border); }
-nav button {
+.icon { flex: none; display: block; }
+
+/* desktop: primary nav is a compact pill in the header */
+.nav-top { display: flex; gap: 3px; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 999px; border: 1px solid var(--panel-border); }
+.nav-top button {
   background: transparent; color: var(--muted); border: none; border-radius: 999px;
-  padding: 7px 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.18s ease; font-family: var(--font);
+  padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.18s ease; font-family: var(--font);
+  display: inline-flex; align-items: center; gap: 7px;
 }
-nav button:hover { color: var(--text); }
-nav button.on {
+.nav-top .icon { width: 17px; height: 17px; }
+.nav-top button:hover { color: var(--text); }
+.nav-top button.on {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   color: #1a1206; font-weight: 600; box-shadow: 0 2px 10px rgba(245,158,11,0.35);
+}
+
+/* phones: primary nav becomes a bottom tab bar (thumb reach). Hidden on desktop. */
+.tabbar { display: none; }
+@media (max-width: 680px) {
+  .nav-top { display: none; }
+  .tabbar {
+    display: flex; z-index: 8;
+    border-top: 1px solid var(--panel-border);
+    background: rgba(10,10,18,0.92); backdrop-filter: blur(18px) saturate(1.4);
+    padding: 6px max(4px, env(safe-area-inset-left)) max(6px, env(safe-area-inset-bottom)) max(4px, env(safe-area-inset-right));
+  }
+  .tabbar button {
+    flex: 1; min-width: 0; min-height: 46px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    background: none; border: none; border-radius: 12px; cursor: pointer;
+    color: var(--muted); font-family: var(--font); font-size: 10.5px; font-weight: 500; letter-spacing: 0.01em;
+    padding: 4px 2px; transition: color 0.16s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tabbar .icon { width: 22px; height: 22px; }
+  .tabbar .nav-label { display: block; }
+  /* active tab: amber icon + label, no filled pill — the fill read as a second
+     menu when it sat 60px under the map-mode pill */
+  .tabbar button.on { color: var(--accent); }
+  .tabbar button.on .icon { filter: drop-shadow(0 0 7px rgba(245,158,11,0.45)); }
+  .tabbar button:active { background: rgba(255,255,255,0.05); }
 }
 .seg button {
   background: rgba(255,255,255,0.06); color: var(--text);
@@ -89,19 +121,25 @@ nav button.on {
 
 /* stats */
 .stats-view { position: absolute; inset: 0; overflow-y: auto; padding: 18px clamp(14px, 4vw, 40px) 60px; }
-.stat-jump { position: sticky; top: -18px; z-index: 6; display: flex; gap: 6px; overflow-x: auto; padding: 14px 0 10px; margin: -18px 0 4px; background: linear-gradient(var(--bg) 60%, transparent); backdrop-filter: blur(6px); scrollbar-width: none; }
+.stat-jump { position: sticky; top: 0; z-index: 6; display: flex; gap: 6px; overflow-x: auto; padding: 12px 0 12px; margin: -18px 0 6px; background: var(--bg); box-shadow: 0 6px 12px -6px var(--bg); scrollbar-width: none; }
+.stat-jump button { min-height: 34px; }
 .stat-jump::-webkit-scrollbar { display: none; }
 .stat-jump button { flex: none; background: rgba(255,255,255,0.06); border: 1px solid var(--panel-border); color: var(--muted); border-radius: 999px; padding: 5px 13px; font: inherit; font-size: 12px; font-family: var(--font-mono); letter-spacing: 0.04em; cursor: pointer; white-space: nowrap; }
 .stat-jump button:hover { color: var(--text); background: rgba(255,255,255,0.1); }
 .stats-view h3 { scroll-margin-top: 52px; }
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: start; }
 .stat { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 14px; padding: 16px; }
 .stat .big { font-size: clamp(22px, 4vw, 30px); font-weight: 700; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .stat .label { color: var(--muted); font-size: 13px; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
 .stat .sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
-.stats-view h3 { margin: 30px 0 12px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.stats-view h3 { margin: 30px 0 12px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .stats-view h3::before { content: ""; width: 14px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
-.stats-view h3 .muted { text-transform: none; letter-spacing: 0; }
+.stats-view h3 .muted { text-transform: none; letter-spacing: 0; font-weight: 400; }
+/* phones: give the caption its own line rather than squeezing it beside the title */
+@media (max-width: 560px) {
+  .stats-view h3 { gap: 4px 8px; }
+  .stats-view h3 > .muted.small { flex: 1 0 100%; margin-left: 22px; }
+}
 .records { display: grid; gap: 1px; background: var(--panel-border); border: 1px solid var(--panel-border); border-radius: 12px; overflow: hidden; }
 .rec-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; background: var(--panel); }
 .rec-k { color: var(--muted); } .rec-v { text-align: right; font-variant-numeric: tabular-nums; }
@@ -181,16 +219,14 @@ code { background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px;
 
 @media (max-width: 560px) {
   header { flex-direction: column; align-items: stretch; gap: 8px; }
-  nav { justify-content: center; flex-wrap: wrap; }
   /* drop the date/status panel below the centred mode switcher so they don't overlap */
-  .top-left { top: calc(52px + env(safe-area-inset-top)); }
-  .top-right { top: auto; bottom: 92px; right: 12px; }
+  .top-left { top: 72px; }
+  .top-right { top: auto; bottom: 88px; right: 12px; }
   .panel { max-width: 64vw; }
   .timeline { flex-wrap: nowrap; }
   .boarding-pass { width: 100vw; top: auto; height: 72vh; border-left: none; border-top: 1px solid var(--panel-border); border-radius: 18px 18px 0 0; }
   /* bigger tap targets for close buttons on touch screens */
   .cp-close { width: 40px; height: 40px; font-size: 16px; }
-  .otd-x { width: 34px; height: 34px; font-size: 16px; display: flex; align-items: center; justify-content: center; top: 4px; right: 4px; }
 }
 
 /* ---- modern refinements + new components ---- */
@@ -210,6 +246,7 @@ code { background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px;
 /* first-visit flags by year */
 .flagyears { display: flex; gap: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 14px; min-height: 64px; background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius); align-items: flex-end; scrollbar-width: thin; }
 .flagcol { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 0 0 auto; }
+.flag-more { font-family: var(--font-mono); font-size: 9.5px; color: var(--accent); background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); border-radius: 3px; width: 26px; height: 18px; display: flex; align-items: center; justify-content: center; flex: none; }
 .flagstack { display: flex; flex-direction: column-reverse; gap: 3px; min-height: 18px; }
 .flag { width: 26px; height: 18px; flex: none; object-fit: cover; border-radius: 3px; display: block; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 .flag-fallback { font-size: 8px; width: 26px; height: 18px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); border-radius: 3px; color: var(--muted); }
@@ -492,22 +529,20 @@ button.bp-trip.open { color: var(--accent); }
 @media (max-width: 480px) { .se-row { grid-template-columns: 1fr 118px 52px 30px; } }
 
 /* ---- On this day ---------------------------------------------------------- */
-.otd { position: fixed; left: 50%; transform: translateX(-50%); top: calc(136px + env(safe-area-inset-top)); z-index: 7; width: min(360px, 92vw); background: var(--panel-solid); border: 1px solid var(--panel-border); border-radius: 14px; padding: 11px 14px 12px; box-shadow: var(--shadow); backdrop-filter: blur(10px); animation: otdIn 0.45s cubic-bezier(0.2,0.8,0.2,1); }
-@keyframes otdIn { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
-.otd-x { position: absolute; top: 8px; right: 9px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 12px; z-index: 1; }
-.otd-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 0 22px 0 0; background: none; border: none; text-align: left; cursor: pointer; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
-.otd-toggle { font-size: 10px; color: var(--muted); flex: none; }
-.otd-collapsed { padding-bottom: 11px; }
-.otd-collapsed .otd-head { margin-bottom: 0; }
-.otd-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
-.otd-list li { display: grid; grid-template-columns: auto auto 1fr; gap: 8px; align-items: baseline; font-size: 13px; }
+/* Inline block at the top of the Trips list — deliberately NOT fixed/floating:
+   as an overlay it collided with content on every tab (and at every scroll
+   position, since its offset was a hardcoded magic number). */
+.otd { margin: 0 0 18px; padding: 12px 14px 13px; background: var(--panel); border: 1px solid var(--panel-border); border-left: 2px solid var(--accent); border-radius: 12px; }
+.otd-head { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.otd-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.otd-list li { display: grid; grid-template-columns: auto auto 1fr; gap: 9px; align-items: baseline; font-size: 13px; }
 .otd-list b { font-family: var(--font-display); font-variant-numeric: tabular-nums; }
 .otd-ago { font-size: 10px; color: var(--muted); font-family: var(--font-mono); }
 .otd-text { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .otd-link { min-width: 0; background: none; border: none; padding: 0; font: inherit; text-align: left; cursor: pointer; }
-.otd-link:hover { color: var(--accent); }
-/* phones: drop the greeting below the (now lower) date panel so nothing overlaps */
-@media (max-width: 560px) { .otd { top: calc(244px + env(safe-area-inset-top)); width: min(360px, 92vw); } }
+.otd-link:hover, .otd-link:focus-visible { color: var(--accent); }
+.otd-more { margin-top: 9px; background: none; border: none; padding: 4px 0; color: var(--muted); font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
+.otd-more:hover { color: var(--accent); }
 
 /* phones: anchor the country panel to the LEFT at full width so it (and its
    close button) can never sit past the right edge — a later non-media rule
@@ -525,6 +560,11 @@ button.bp-trip.open { color: var(--accent); }
 /* mobile bottom-sheet slides UP (not sideways) — never shifts horizontally, so
    the close button is always on-screen even mid-animation */
 @keyframes sheetUp { from { transform: translateY(26px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* Expander for the long Stats lists (ranking, stamps): both used to render all
+   69 rows inline, which together were 42% of the page height. */
+.more-btn { display: block; width: 100%; margin: 0 0 6px; padding: 11px 14px; min-height: 44px; background: rgba(255,255,255,0.04); border: 1px solid var(--panel-border); border-radius: 11px; color: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer; transition: 0.16s ease; }
+.more-btn:hover { color: var(--accent); border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.06); }
 
 /* ---- Country ranking table (Stats) --------------------------------------- */
 .ctable-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 4px 0 10px; border: 1px solid var(--panel-border); border-radius: 12px; }
@@ -563,33 +603,26 @@ button.bp-trip.open { color: var(--accent); }
 .stamp-year { font-family: var(--font-mono); font-size: 10px; color: var(--accent); }
 
 /* ---- Wishlist ------------------------------------------------------------- */
-/* desktop: text pills (icons hidden) */
-.nav-ico { display: none; }
-nav { flex-wrap: wrap; justify-content: flex-end; }
 
 /* map-mode switch (Journey/Countries/Flights/Globe inside the Map tab) */
 .map-modes { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 4; display: flex; gap: 3px; background: rgba(20,20,30,0.7); backdrop-filter: blur(12px); border: 1px solid var(--panel-border); border-radius: 999px; padding: 4px; }
 .map-modes button { background: none; border: none; color: var(--muted); cursor: pointer; font: inherit; font-size: 13px; padding: 6px 14px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; }
 .map-modes button:hover { color: var(--text); }
 .map-modes button.on { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #1a1206; font-weight: 600; }
-.map-modes .nav-ico { display: none; }
+.map-modes .icon { width: 18px; height: 18px; }
 
-/* phones: compact icon strip, active tab shows its label */
+/* phones: icon strip with the active mode labelled. This is now the ONLY pill
+   on screen (primary nav moved to the bottom bar), so it reads as a view switch
+   rather than a second menu. 44px targets. */
 @media (max-width: 680px) {
-  .map-modes { top: 8px; gap: 2px; padding: 3px; }
-  .map-modes button { padding: 6px 9px; }
-  .map-modes .nav-ico { display: inline-block; font-size: 15px; line-height: 1; }
+  .map-modes { top: 8px; gap: 2px; padding: 4px; }
+  .map-modes button { padding: 10px 12px; min-height: 44px; min-width: 44px; justify-content: center; }
   .map-modes .nav-label { display: none; }
-  .map-modes button.on .nav-label { display: inline; }
-  header { gap: 8px; padding-top: max(10px, env(safe-area-inset-top)); }
+  .map-modes button.on { padding-right: 15px; }
+  .map-modes button.on .nav-label { display: inline; font-size: 13px; }
+  header { gap: 8px; padding-top: max(10px, env(safe-area-inset-top)); padding-bottom: 10px; }
   .title .small { display: none; }
-  .title strong { font-size: 15px; }
-  nav { flex-wrap: nowrap; overflow-x: auto; max-width: 64%; gap: 2px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-  nav::-webkit-scrollbar { display: none; }
-  nav button { padding: 7px 9px; display: inline-flex; align-items: center; }
-  .nav-ico { display: inline-block; font-size: 15px; line-height: 1; }
-  .nav-label { display: none; }
-  nav button.on .nav-label { display: inline; margin-left: 6px; font-size: 12px; }
+  .title strong { font-size: 16px; }
 }
 /* ---- Add / capture view -------------------------------------------------- */
 .add-view { position: absolute; inset: 0; overflow-y: auto; padding: 18px clamp(14px, 4vw, 40px) max(60px, env(safe-area-inset-bottom)); }

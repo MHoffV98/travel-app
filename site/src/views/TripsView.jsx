@@ -8,6 +8,7 @@ import RouteMap from "../RouteMap.jsx";
 import { downloadTripCard } from "../tripCard.js";
 import { getPhotos, addPhotos, deletePhoto, photoCounts, photoTripKey } from "../photoStore.js";
 import PackingList from "../PackingList.jsx";
+import OnThisDay from "../OnThisDay.jsx";
 import { packingKeys, packingKey } from "../packingStore.js";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -302,7 +303,7 @@ function TripCard({ trip, meta, onMeta, onSelect, onOpenEntity, open, onToggle, 
   );
 }
 
-export default function TripsView({ onSelect, onOpenEntity, focusTrip }) {
+export default function TripsView({ onSelect, onOpenEntity, onOpenTrip, focusTrip }) {
   const [openId, setOpenId] = useState(null);
   const [meta, setMeta] = useState(loadTripMeta);
   const [counts, setCounts] = useState({});
@@ -342,6 +343,7 @@ export default function TripsView({ onSelect, onOpenEntity, focusTrip }) {
         <h2>{TRIPS.filter((t) => !t.upcoming).length} trips{TRIPS.some((t) => t.upcoming) ? <span className="muted"> · {TRIPS.filter((t) => t.upcoming).length} upcoming</span> : null}</h2>
         <span className="muted small">Every journey, newest first · tap to open the route, itinerary &amp; add your own notes</span>
       </div>
+      <OnThisDay onOpenTrip={onOpenTrip} />
       {groups.map((g) => (
         <section key={g.year} className="trips-year">
           <h3>{g.year}</h3>

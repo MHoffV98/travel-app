@@ -1,5 +1,7 @@
-// OnThisDay.jsx — a small dismissible greeting card: what you were doing on
-// today's calendar date in past years. Shows nothing if there's no match.
+// OnThisDay.jsx — an inline "what were you doing on today's date" block. It lives
+// at the top of the Trips list (not as a floating overlay) because every entry
+// links to a trip, so it belongs in the list it refers to. Renders nothing when
+// today's calendar date has no history.
 import { useMemo, useState } from "react";
 import { data, TRIPS } from "./data.js";
 
@@ -9,11 +11,10 @@ const pad = (n) => String(n).padStart(2, "0");
 const lo = (s) => { const [y, m, d] = s.split("-"); return `${y}-${m || "01"}-${d || "01"}`; };
 const hi = (s) => { const [y, m, d] = s.split("-"); const mm = m || "12"; const dd = d || pad(new Date(+y, +mm, 0).getDate()); return `${y}-${mm}-${dd}`; };
 
+const SHOWN = 3; // rows before the "show all" toggle
+
 export default function OnThisDay({ onOpenTrip }) {
-  const [closed, setClosed] = useState(() => sessionStorage.getItem("otd-closed") === "1");
-  // Collapsed to a single line by default on small screens so it doesn't cover
-  // the map/content; tap the header to expand. Open by default on desktop.
-  const [open, setOpen] = useState(() => (typeof window !== "undefined" ? window.innerWidth > 560 : true));
+  const [all, setAll] = useState(false);
 
   const { entries, label } = useMemo(() => {
     const now = new Date();
@@ -44,17 +45,14 @@ export default function OnThisDay({ onOpenTrip }) {
     return { entries, label: `${now.getDate()} ${MONTHS[now.getMonth()]}` };
   }, []);
 
-  if (closed || !entries.length) return null;
+  if (!entries.length) return null;
+  const rows = all ? entries : entries.slice(0, SHOWN);
+  const more = entries.length - rows.length;
   return (
-    <div className={`otd ${open ? "" : "otd-collapsed"}`}>
-      <button className="otd-x" onClick={() => { sessionStorage.setItem("otd-closed", "1"); setClosed(true); }} aria-label="Dismiss">✕</button>
-      <button className="otd-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-        <span>On this day · {label}</span>
-        <span className="otd-toggle">{open ? "▾" : `${entries.length} ▸`}</span>
-      </button>
-      {open && (
+    <div className="otd">
+      <div className="otd-head">On this day · {label}</div>
       <ul className="otd-list">
-        {entries.slice(0, 6).map((e) => (
+        {rows.map((e) => (
           <li key={e.year}>
             <b>{e.year}</b><span className="otd-ago">{e.ago}y ago</span>
             {e.tripId && onOpenTrip
@@ -63,6 +61,10 @@ export default function OnThisDay({ onOpenTrip }) {
           </li>
         ))}
       </ul>
+      {(more > 0 || all) && (
+        <button className="otd-more" onClick={() => setAll((a) => !a)}>
+          {all ? "Show fewer" : `Show ${more} more`}
+        </button>
       )}
     </div>
   );
