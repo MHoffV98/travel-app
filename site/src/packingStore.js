@@ -17,14 +17,30 @@ const localAll = () => { try { return JSON.parse(localStorage.getItem(LOCAL_KEY)
 const localWrite = (m) => { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(m)); } catch { /* quota */ } };
 
 // ---------- backend resolution (cloud vs local), probed once ----------
+// Three outcomes, and the difference matters:
+//   "cloud"       synced store reachable
+//   "local"       there is no backend at all (dev, or no Blob store connected)
+//   "unreachable" there IS one, we just couldn't reach it right now — offline,
+//                 signed out, or a cold start that timed out
+async function probe() {
+  try {
+    const r = await fetch("/api/packing?probe=1", { headers: { accept: "application/json" } });
+    if (r.ok && (await r.json().catch(() => ({}))).ok) return "cloud";
+    if (r.status === 404) return "local";     // function isn't deployed — dev server
+    return "unreachable";                     // 401 signed out, 503 hiccup, 5xx
+  } catch { return "unreachable"; }           // offline / DNS / aborted
+}
+
 let backendP;
 function backend() {
+  // Only a settled answer is cached. A failed probe must never latch for the
+  // rest of the session: one bad request on a phone used to leave every packing
+  // list and photo looking permanently deleted.
   if (!backendP) backendP = (async () => {
-    try {
-      const r = await fetch("/api/packing?probe=1", { headers: { accept: "application/json" } });
-      if (r.ok && (await r.json().catch(() => ({}))).ok) { await migrate(); return "cloud"; }
-    } catch { /* offline or no function → local */ }
-    return "local";
+    const b = await probe();
+    if (b === "cloud") await migrate();
+    if (b === "unreachable") backendP = null;   // so the next call tries again
+    return b;
   })();
   return backendP;
 }
@@ -63,24 +79,40 @@ function relinkKey(trip, keys) {
 }
 
 // ---------- public API ----------
+const fromLocal = (trip) => {
+  const all = localAll(), key = packingKey(trip.id);
+  if (all[key]) return all[key];
+  const hit = relinkKey(trip, Object.keys(all));
+  return hit ? all[hit] : null;
+};
+
+/**
+ * Returns { list, offline }.
+ *
+ * `offline: true` means the synced store exists but we couldn't read it, so a
+ * null list means "don't know", NOT "no list". The caller must not offer to
+ * generate a fresh one in that state — that's what made a momentary blip look
+ * like the trip's packing list had been deleted.
+ */
 export async function getPackingList(trip) {
   const key = packingKey(trip.id);
   // Local edits that haven't reached the cloud are the newer truth — serving the
   // cloud's stale copy here would show old state and then overwrite the edits.
-  if (pendingKeys().includes(key)) { flushPending(); return localAll()[key] || null; }
-  if ((await backend()) === "cloud") {
+  if (pendingKeys().includes(key)) { flushPending(); return { list: localAll()[key] || null, offline: false }; }
+  const b = await backend();
+  if (b === "cloud") {
     try {
       const keys = (await (await fetch("/api/packing?keys=1")).json()).keys || [];
       const hit = relinkKey(trip, keys);
-      if (!hit) return null;
+      if (!hit) return { list: null, offline: false };          // genuinely no list
       const j = await (await fetch(`/api/packing?trip=${encodeURIComponent(hit)}`)).json();
-      return j.list || null;
-    } catch { /* fall through to local */ }
+      return { list: j.list || null, offline: false };
+    } catch {
+      return { list: fromLocal(trip), offline: true };          // reachable, then wasn't
+    }
   }
-  const all = localAll();
-  if (all[key]) return all[key];
-  const hit = relinkKey(trip, Object.keys(all));
-  return hit ? all[hit] : null;
+  if (b === "unreachable") return { list: fromLocal(trip), offline: true };
+  return { list: fromLocal(trip), offline: false };
 }
 
 // Keys whose cloud write failed (packing happens on planes). Retried on the next

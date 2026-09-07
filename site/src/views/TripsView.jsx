@@ -126,6 +126,7 @@ function Lightbox({ photos, index, onClose, onIndex }) {
 
 function TripPhotos({ trip, onCount }) {
   const [photos, setPhotos] = useState([]); // {id, url, pathname?, revoke?}
+  const [offline, setOffline] = useState(false);
   const [busy, setBusy] = useState(false);
   const [lb, setLb] = useState(-1);
   const inputRef = useRef(null);
@@ -133,10 +134,12 @@ function TripPhotos({ trip, onCount }) {
 
   const load = async () => {
     revokable.current.forEach((u) => URL.revokeObjectURL(u));
-    const recs = await getPhotos(trip.id);
+    const { photos: recs, offline: off } = await getPhotos(trip.id);
     revokable.current = recs.filter((r) => r.revoke).map((r) => r.url);
     setPhotos(recs);
-    onCount?.(trip.id, recs.length);
+    setOffline(off);
+    // Don't report a count we couldn't actually read — it would wipe the 📷 marker.
+    if (!off) onCount?.(trip.id, recs.length);
   };
   useEffect(() => { load(); return () => revokable.current.forEach((u) => URL.revokeObjectURL(u)); }, [trip.id]);
 
@@ -156,6 +159,12 @@ function TripPhotos({ trip, onCount }) {
         <button className="tp-add" onClick={() => inputRef.current?.click()} disabled={busy}>{busy ? "Adding…" : "＋ Add"}</button>
         <input ref={inputRef} type="file" accept="image/*" multiple hidden onChange={onAdd} />
       </div>
+      {offline && (
+        <div className="tp-offline">
+          Couldn’t reach your synced photos — a connection problem, nothing deleted.
+          <button onClick={load}>Retry</button>
+        </div>
+      )}
       {photos.length > 0 && (
         <div className="tp-grid">
           {photos.map((p, i) => (

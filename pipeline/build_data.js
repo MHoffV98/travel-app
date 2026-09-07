@@ -668,10 +668,10 @@ async function main() {
   // stays that were a genuine visit: an overnight, a real (non-transit) presence,
   // a logged place, or a whitelisted day-visit. Pure airport connections — where
   // every touch is an airside layover with no overnight — don't count as a trip.
-  const computeStays = (dates, realDates, iso) => {
-    const rel = dates.filter(Boolean).filter((d) => isoHomeOn(d) !== iso).sort();
-    if (!rel.length) return { count: 0, years: [], first: null, last: null };
-    const real = new Set(realDates.filter((d) => isoHomeOn(d) !== iso));
+  const qualifyingStays = (dates, realDates, iso) => {
+    const rel = dates.filter(Boolean).sort();
+    if (!rel.length) return [];
+    const real = new Set(realDates.filter(Boolean));
     const events = nightEventsByIso[iso] || [];
     const clusters = [];
     let cur = [rel[0]];
@@ -689,12 +689,24 @@ async function main() {
       const hasReal = cl.some((d) => real.has(d));
       if (nights >= 1 || hasReal || whitelisted) qualifying.push({ from, to, yrs });
     }
-    const years = [...new Set(qualifying.flatMap((q) => q.yrs))].sort();
-    const ds = qualifying.flatMap((q) => [q.from, q.to]).sort();
+    return qualifying;
+  };
+  const computeStays = (dates, realDates, iso) => {
+    const away = (d) => isoHomeOn(d) !== iso;
+    // visit_count / visit_years / visit_starts count only the times you went there
+    // as a visitor — living there isn't a "visit", and entry/exit of your own home
+    // shouldn't inflate the count.
+    const visits = qualifyingStays(dates.filter(away), realDates.filter(away), iso);
+    // first_visit / last_visit, though, are about when you were first and last in
+    // the country at all — a country you later moved to was still first set foot in
+    // on the day you arrived (Australia: Jun 2022, not the first trip back in 2025).
+    const ever = qualifyingStays(dates, realDates, iso);
+    const years = [...new Set(visits.flatMap((q) => q.yrs))].sort();
+    const ds = ever.flatMap((q) => [q.from, q.to]).sort();
     // start date of each qualifying stay — lets the country card show/number the
     // same trips as visit_count (excluding 0-night layover clusters).
-    const starts = qualifying.map((q) => q.from);
-    return { count: qualifying.length, years, first: ds[0] || null, last: ds.at(-1) || null, starts };
+    const starts = visits.map((q) => q.from);
+    return { count: visits.length, years, first: ds[0] || null, last: ds.at(-1) || null, starts };
   };
   const precisionFor = (iso, date) => {
     // if the earliest date comes from a manual entry, use its precision

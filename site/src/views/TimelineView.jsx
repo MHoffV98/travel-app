@@ -114,12 +114,12 @@ export default function TimelineView({ theme }) {
         getFillColor: (f) => {
           const rd = reached(f.properties);
           if (!rd) return [0, 0, 0, 0];
-          return [...a1, fresh(rd) ? 150 : 48];
+          return [...a1, fresh(rd) ? 205 : 104];
         },
         getLineColor: (f) => {
           const rd = reached(f.properties);
           if (!rd) return [0, 0, 0, 0];
-          return [...a1, fresh(rd) ? 235 : 95];
+          return [...a1, fresh(rd) ? 255 : 158];
         },
         getLineWidth: 1, lineWidthUnits: "pixels",
         updateTriggers: { getFillColor: [cutoff], getLineColor: [cutoff] },

@@ -30,6 +30,7 @@ export default function PackingList({ trip, onHasList }) {
   const [tripType, setTripType] = useState("leisure");
   const [adding, setAdding] = useState("");
   const [busy, setBusy] = useState(false);
+  const [offline, setOffline] = useState(false);
 
   const days = tripDays(trip);
   // Repacking only matters while you're away or just back; older trips open on
@@ -41,21 +42,25 @@ export default function PackingList({ trip, onHasList }) {
   const archived = now > ended + 30 * DAY;
   const editable = !archived || unlocked;
 
+  const load = async (isLive = () => true) => {
+    const [got, e] = await Promise.all([getPackingList(trip), getEssentials()]);
+    if (!isLive()) return;
+    const ready = got.list ? ensureMeasures(got.list) : null;
+    setOffline(got.offline);
+    setList(ready);
+    setEssentials(e);
+    setLoaded(true);
+    if (ready) { setClimate(ready.climate); setTripType(ready.tripType); onHasList?.(trip.id, true); }
+    else setClimate(guessClimate(tripLat(trip), started ? new Date(started).getMonth() : NaN));
+    // Only open on the return leg once there's actually an outbound pack to
+    // come home with — a list generated mid-trip should still start outbound.
+    if (repackWindow && ready && ready.items.some((i) => i.packed)) setMode("return");
+  };
+  const reload = async () => { setBusy(true); try { await load(); } finally { setBusy(false); } };
+
   useEffect(() => {
     let live = true;
-    (async () => {
-      const [l, e] = await Promise.all([getPackingList(trip), getEssentials()]);
-      if (!live) return;
-      const ready = l ? ensureMeasures(l) : null;
-      setList(ready);
-      setEssentials(e);
-      setLoaded(true);
-      if (ready) { setClimate(ready.climate); setTripType(ready.tripType); onHasList?.(trip.id, true); }
-      else setClimate(guessClimate(tripLat(trip), started ? new Date(started).getMonth() : NaN));
-      // Only open on the return leg once there's actually an outbound pack to
-      // come home with — a list generated mid-trip should still start outbound.
-      if (repackWindow && ready && ready.items.some((i) => i.packed)) setMode("return");
-    })();
+    load(() => live);
     return () => { live = false; };
   }, [trip.id]);
 
@@ -109,6 +114,21 @@ export default function PackingList({ trip, onHasList }) {
 
   if (!loaded) return <div className="pk-wrap"><div className="pk-loading">Loading packing list…</div></div>;
 
+  // ---- couldn't reach the synced store: say so, never offer to regenerate ---
+  // A null list here means "unknown", not "none". Showing the generator would
+  // invite the user to rebuild a list that already exists on the server.
+  if (offline && !list) {
+    return (
+      <div className="pk-wrap">
+        <div className="pk-head"><h4>Packing list</h4></div>
+        <div className="pk-unreachable">
+          Couldn't reach your synced packing lists just now — this is a connection
+          problem, not a lost list. Nothing has been deleted.
+          <button onClick={reload} disabled={busy}>{busy ? "Trying…" : "Try again"}</button>
+        </div>
+      </div>
+    );
+  }
   // ---- generator (no list yet) --------------------------------------------
   if (!list) {
     return (
@@ -151,6 +171,12 @@ export default function PackingList({ trip, onHasList }) {
         <span className="pk-gen-at"> · list made {new Date(list.generatedAt).toLocaleDateString()} · {list.climate} · {list.tripType}</span>
       </div>
 
+      {offline && (
+        <div className="pk-unreachable">
+          Offline — showing the copy saved on this device. Changes sync when you're back.
+          <button onClick={reload} disabled={busy}>{busy ? "Trying…" : "Retry"}</button>
+        </div>
+      )}
       {archived && !unlocked && (
         <div className="pk-archived">
           This trip is over — showing what you took, read-only.

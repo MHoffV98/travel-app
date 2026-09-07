@@ -55,14 +55,30 @@ async function localAll() {
 async function localDelete(id) { const s = await os("readwrite"); return new Promise((res, rej) => { const r = s.delete(id); r.onsuccess = () => res(); r.onerror = () => rej(r.error); }); }
 
 // ---------- backend resolution (cloud vs local), probed once ----------
+// Three outcomes, and the difference matters:
+//   "cloud"       synced store reachable
+//   "local"       there is no backend at all (dev, or no Blob store connected)
+//   "unreachable" there IS one, we just couldn't reach it right now — offline,
+//                 signed out, or a cold start that timed out
+async function probe() {
+  try {
+    const r = await fetch("/api/photos?probe=1", { headers: { accept: "application/json" } });
+    if (r.ok && (await r.json().catch(() => ({}))).ok) return "cloud";
+    if (r.status === 404) return "local";     // function isn't deployed — dev server
+    return "unreachable";                     // 401 signed out, 503 hiccup, 5xx
+  } catch { return "unreachable"; }           // offline / DNS / aborted
+}
+
 let backendP;
 function backend() {
+  // Only a settled answer is cached. A failed probe must never latch for the
+  // rest of the session: one bad request on a phone used to leave every trip's
+  // photos looking permanently deleted.
   if (!backendP) backendP = (async () => {
-    try {
-      const r = await fetch("/api/photos?probe=1", { headers: { accept: "application/json" } });
-      if (r.ok && (await r.json().catch(() => ({}))).ok) { await migrate(); return "cloud"; }
-    } catch { /* offline or no function → local */ }
-    return "local";
+    const b = await probe();
+    if (b === "cloud") await migrate();
+    if (b === "unreachable") backendP = null;   // so the next call tries again
+    return b;
   })();
   return backendP;
 }
@@ -82,16 +98,27 @@ async function migrate() {
 }
 
 // ---------- public API ----------
+const localPhotos = async (trip) =>
+  (await localGet(trip)).map((rec) => ({ id: rec.id, url: URL.createObjectURL(rec.blob), revoke: true }));
+
+/**
+ * Returns { photos, offline }. `offline: true` means the synced store exists but
+ * couldn't be read, so an empty array means "don't know", not "no photos" — the
+ * caller should say so rather than showing a bare empty gallery.
+ */
 export async function getPhotos(trip) {
-  if ((await backend()) === "cloud") {
+  const b = await backend();
+  if (b === "cloud") {
     try {
       const r = await fetch(`/api/photos?trip=${encodeURIComponent(photoTripKey(trip))}`);
+      if (!r.ok) throw new Error(`photos ${r.status}`);
       const j = await r.json();
-      return (j.photos || []).map((p) => ({ id: p.id, pathname: p.pathname, url: `/api/photos?pathname=${encodeURIComponent(p.pathname)}` }));
-    } catch { /* fall through to local */ }
+      return { photos: (j.photos || []).map((p) => ({ id: p.id, pathname: p.pathname, url: `/api/photos?pathname=${encodeURIComponent(p.pathname)}` })), offline: false };
+    } catch {
+      return { photos: await localPhotos(trip), offline: true };
+    }
   }
-  const recs = await localGet(trip);
-  return recs.map((rec) => ({ id: rec.id, url: URL.createObjectURL(rec.blob), revoke: true }));
+  return { photos: await localPhotos(trip), offline: b === "unreachable" };
 }
 
 export async function addPhotos(trip, files, stampStart = Date.now()) {

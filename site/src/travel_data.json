@@ -1,7 +1,7 @@
 {
   "meta": {
-    "built": "2026-09-06",
-    "built_at": "2026-09-06T21:21:28.415Z",
+    "built": "2026-09-07",
+    "built_at": "2026-09-07T12:59:20.680Z",
     "flight_count": 306,
     "source": "FlightyExport-2026-07-13.csv",
     "last_flight": "2026-09-06",
@@ -14679,7 +14679,7 @@
       "iso2": "AU",
       "name": "Australia",
       "status": "visited",
-      "first_visit": "2025-08-28",
+      "first_visit": "2022-06-30",
       "last_visit": "2026-02-01",
       "first_visit_precision": "day",
       "visit_count": 2,
@@ -16227,7 +16227,7 @@
       "is_current_home": true,
       "cities": 25,
       "nights": 2351,
-      "home_nights": 9669,
+      "home_nights": 9670,
       "transports": [
         "flight",
         "train",
@@ -16547,8 +16547,8 @@
     "countries_total": 69,
     "countries_transit_only": 6,
     "layover_visits": 3,
-    "nights_total": 11125,
-    "nights_home": 10219,
+    "nights_total": 11126,
+    "nights_home": 10220,
     "nights_travel": 906,
     "busiest_year": [
       "2023",

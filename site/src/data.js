@@ -373,13 +373,13 @@ function buildTrips() {
 
     const mapLegs = flights
       .filter((e) => Number.isFinite(e.from?.lat) && Number.isFinite(e.to?.lat))
-      .map((e) => ({ from: { lat: e.from.lat, lon: e.from.lon }, to: { lat: e.to.lat, lon: e.to.lon } }));
+      .map((e) => ({ from: { lat: e.from.lat, lon: e.from.lon }, to: { lat: e.to.lat, lon: e.to.lon }, date: e.date }));
     const mapPoints = [];
     evs.forEach((e) => {
       if (e.kind === "flight") {
-        if (Number.isFinite(e.from?.lat)) mapPoints.push({ lat: e.from.lat, lon: e.from.lon });
-        if (Number.isFinite(e.to?.lat)) mapPoints.push({ lat: e.to.lat, lon: e.to.lon });
-      } else if (Number.isFinite(e.lat)) mapPoints.push({ lat: e.lat, lon: e.lon });
+        if (Number.isFinite(e.from?.lat)) mapPoints.push({ lat: e.from.lat, lon: e.from.lon, date: e.date });
+        if (Number.isFinite(e.to?.lat)) mapPoints.push({ lat: e.to.lat, lon: e.to.lon, date: e.date });
+      } else if (Number.isFinite(e.lat)) mapPoints.push({ lat: e.lat, lon: e.lon, date: e.date });
     });
     // Overland legs. International / tagged trips CHAIN: airport → place → place →
     // … → departure airport (incl. the drive back to catch the flight). Pure
@@ -425,13 +425,13 @@ function buildTrips() {
       mapInferred.push({ from: lastPt, to: homeLoc, date: end });
     }
     // show the home hub for domestic spoke trips
-    if (domestic && homeLoc && mapGround.length) mapPoints.push({ lat: homeLoc.lat, lon: homeLoc.lon });
+    if (domestic && homeLoc && mapGround.length) mapPoints.push({ lat: homeLoc.lat, lon: homeLoc.lon, date: start });
     // the map frames on where you actually went (the ground stops), so the home
     // base / long-haul airports fall off the edge with their legs running off-screen.
     // Pure flight trips (no ground stops) fall back to all points.
-    const visitPts = evs.filter((e) => e.kind === "visit" && Number.isFinite(e.lat)).map((e) => ({ lat: e.lat, lon: e.lon }));
+    const visitPts = evs.filter((e) => e.kind === "visit" && Number.isFinite(e.lat)).map((e) => ({ lat: e.lat, lon: e.lon, date: e.date }));
     const mapFocus = visitPts.length ? visitPts.slice() : mapPoints.slice();
-    if (domestic && homeLoc) mapFocus.push({ lat: homeLoc.lat, lon: homeLoc.lon });
+    if (domestic && homeLoc) mapFocus.push({ lat: homeLoc.lat, lon: homeLoc.lon, date: start });
 
     return {
       id, explicit: cl.trip, defaultName, birthday, start, end, startDay,

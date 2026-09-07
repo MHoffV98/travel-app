@@ -55,12 +55,18 @@ export default function YearReview({ year, onClose, onYear }) {
     ].filter(Boolean),
   });
 
-  const yTrips = TRIPS.filter((t) => t.year === +Y);
-  const ymLegs = yTrips.flatMap((t) => t.mapLegs);
-  const ymGround = yTrips.flatMap((t) => t.mapGround);
-  const ymPoints = yTrips.flatMap((t) => t.mapPoints);
-  const ymInferred = yTrips.flatMap((t) => t.mapInferred);
-  const ymFocus = yTrips.flatMap((t) => t.mapFocus);
+  // The map is sliced by the date of each leg, not by the year the trip started —
+  // a trip spanning New Year (e.g. Australia, Nov 2025 → Feb 2026) shows its
+  // outbound half in one year and the rest in the next, so the map agrees with
+  // the flight counts above it.
+  const inY = (d) => (d || "").startsWith(Y);
+  const yTrips = TRIPS.filter((t) => t.start.slice(0, 4) <= Y && t.end.slice(0, 4) >= Y);
+  const ymLegs = yTrips.flatMap((t) => t.mapLegs.filter((l) => inY(l.date)));
+  const ymGround = yTrips.flatMap((t) => t.mapGround.filter((l) => inY(l.date)));
+  const ymPoints = yTrips.flatMap((t) => t.mapPoints.filter((p) => inY(p.date)));
+  const ymInferred = yTrips.flatMap((t) => t.mapInferred.filter((l) => inY(l.date)));
+  const focusInY = yTrips.flatMap((t) => t.mapFocus.filter((p) => inY(p.date)));
+  const ymFocus = focusInY.length ? focusInY : ymPoints; // a year of pure flying has no ground stops to frame on
 
   return (
     <div className="yr-backdrop" onClick={onClose}>
