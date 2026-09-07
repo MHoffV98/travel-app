@@ -99,6 +99,11 @@ permanently — it's the record of what you actually took.
 - **Wear it:** when things don't fit, the app works out which bulky items worn
   through the airport would free enough space, and offers one button to do it.
   Worn items cost no bag space; the 👕 beside an item toggles it by hand.
+- **Nothing is replaced silently:** regenerating asks first, and the list it
+  replaces is kept server-side (last 10). If a trip looks like it has no list,
+  any recoverable copy — this device's, or a superseded version — is offered
+  back *above* the Generate button, so a failed read can never be mistaken for
+  an empty trip and overwritten.
 - **Things I always forget:** Add tab → a single global list, seeded into every
   new packing list. Editing it never touches lists already attached to a trip.
 - Lists sync through the same private Blob store as the photos, and fall back to

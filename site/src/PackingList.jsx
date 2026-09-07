@@ -13,7 +13,7 @@ import {
   generatePackingList, customItem, byCategory, allocate, ensureMeasures, wearToFit, withQty,
   guessClimate, tripLat, tripDays,
 } from "./packing.js";
-import { getPackingList, savePackingList, getEssentials } from "./packingStore.js";
+import { getPackingList, savePackingList, getEssentials, localCopy, getHistory, restoreVersion } from "./packingStore.js";
 
 const kg = (n) => `${(Math.round(n * 10) / 10).toFixed(1)}kg`;
 const litres = (n) => `${Math.round(n)}L`;
@@ -31,6 +31,7 @@ export default function PackingList({ trip, onHasList }) {
   const [adding, setAdding] = useState("");
   const [busy, setBusy] = useState(false);
   const [offline, setOffline] = useState(false);
+  const [recover, setRecover] = useState({ local: null, versions: [] });
 
   const days = tripDays(trip);
   // Repacking only matters while you're away or just back; older trips open on
@@ -51,7 +52,15 @@ export default function PackingList({ trip, onHasList }) {
     setEssentials(e);
     setLoaded(true);
     if (ready) { setClimate(ready.climate); setTripType(ready.tripType); onHasList?.(trip.id, true); }
-    else setClimate(guessClimate(tripLat(trip), started ? new Date(started).getMonth() : NaN));
+    else {
+      setClimate(guessClimate(tripLat(trip), started ? new Date(started).getMonth() : NaN));
+      // No list found — before offering to build one, look for a list that
+      // already existed: the copy this device wrote, and anything the server
+      // kept when a previous list was replaced.
+      const local = localCopy(trip);
+      const versions = await getHistory(trip);
+      if (isLive()) setRecover({ local, versions });
+    }
     // Only open on the return leg once there's actually an outbound pack to
     // come home with — a list generated mid-trip should still start outbound.
     if (repackWindow && ready && ready.items.some((i) => i.packed)) setMode("return");
@@ -73,10 +82,30 @@ export default function PackingList({ trip, onHasList }) {
   const reallocate = (next) => persist({ ...next, items: allocate(next).items });
 
   const generate = async () => {
-    if (list && !confirm("Regenerate this list? Everything you've ticked off, and anything you added yourself, will be lost.")) return;
+    // Generating replaces everything. Confirm whenever there's something to lose —
+    // including when no list is on screen but one is recoverable, which is exactly
+    // the case that destroyed a curated list before.
+    const recoverable = recover.local || recover.versions.length;
+    const warn = list
+      ? "Regenerate this list? Everything you've ticked off, and anything you added yourself, will be lost."
+      : recoverable
+        ? "This trip already has a packing list saved. Generating a new one replaces it — restore the old one instead?\n\nOK to generate a fresh list anyway."
+        : null;
+    if (warn && !confirm(warn)) return;
     const next = generatePackingList(trip, { climate, tripType, essentials, bags: list?.bags });
     await persist(next);
     onHasList?.(trip.id, true);
+  };
+
+  const restoreLocal = async () => {
+    setBusy(true);
+    try { await savePackingList(trip, recover.local); setList(ensureMeasures(recover.local)); onHasList?.(trip.id, true); }
+    finally { setBusy(false); }
+  };
+  const restoreServer = async (id) => {
+    setBusy(true);
+    try { const l = await restoreVersion(trip, id); if (l) { setList(ensureMeasures(l)); onHasList?.(trip.id, true); } }
+    finally { setBusy(false); }
   };
 
   const patchItem = (id, p) => persist({ ...list, items: list.items.map((i) => (i.id === id ? { ...i, ...p } : i)) });
@@ -130,10 +159,34 @@ export default function PackingList({ trip, onHasList }) {
     );
   }
   // ---- generator (no list yet) --------------------------------------------
+  // A list that already exists is offered back first. Silently showing only the
+  // Generate button here is what let a curated list get replaced by a default one.
+  const recovery = (recover.local || recover.versions.length) ? (
+    <div className="pk-recover">
+      <b>This trip already had a packing list.</b>
+      <ul>
+        {recover.local && (
+          <li>
+            Saved on this device — {recover.local.items.length} items,
+            {" "}{recover.local.items.filter((i) => i.packed).length} packed
+            <button onClick={restoreLocal} disabled={busy}>Restore</button>
+          </li>
+        )}
+        {recover.versions.map((v) => (
+          <li key={v.id}>
+            Replaced {v.savedAt ? new Date(v.savedAt).toLocaleString() : "earlier"} — {v.items} items, {v.packed} packed
+            <button onClick={() => restoreServer(v.id)} disabled={busy}>Restore</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ) : null;
+
   if (!list) {
     return (
       <div className="pk-wrap">
         <div className="pk-head"><h4>Packing list</h4></div>
+        {recovery}
         <p className="pk-intro">
           {days} day{days > 1 ? "s" : ""} · {trip.countries.map((c) => c.name || c).join(", ") || "no countries"} — confirm the two things the trip record can't tell us, and it'll build a list that stays attached to this trip.
         </p>
@@ -154,6 +207,7 @@ export default function PackingList({ trip, onHasList }) {
       </div>
     );
   }
+
 
   // ---- the list ------------------------------------------------------------
   return (

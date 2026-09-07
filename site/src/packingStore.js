@@ -179,3 +179,35 @@ export async function saveEssentials(essentials) {
     try { await fetch("/api/packing", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ essentials }) }); } catch { /* local copy stands */ }
   }
 }
+
+// ---------- recovery -------------------------------------------------------
+// A packing list is permanent trip history and a regenerate replaces the whole
+// thing, so both the on-device copy and the server's superseded versions are
+// offered back rather than quietly lost.
+
+/** The copy this device last wrote, if any — survives the server being overwritten. */
+export function localCopy(trip) {
+  const all = localAll(), key = packingKey(trip.id);
+  return all[key] || (relinkKey(trip, Object.keys(all)) ? all[relinkKey(trip, Object.keys(all))] : null);
+}
+
+/** Superseded versions kept server-side: [{id, savedAt, generatedAt, items, packed}]. */
+export async function getHistory(trip) {
+  if ((await backend()) !== "cloud") return [];
+  try {
+    const r = await fetch(`/api/packing?history=${encodeURIComponent(packingKey(trip.id))}`);
+    return (await r.json()).versions || [];
+  } catch { return []; }
+}
+
+/** Put a superseded version back; the current one is snapshotted first. */
+export async function restoreVersion(trip, id) {
+  const r = await fetch("/api/packing", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ restore: { trip: packingKey(trip.id), id } }),
+  });
+  if (!r.ok) throw new Error("restore failed");
+  const j = await r.json();
+  if (j.list) { const all = localAll(); all[packingKey(trip.id)] = j.list; localWrite(all); }
+  return j.list || null;
+}

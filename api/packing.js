@@ -10,7 +10,7 @@
 //
 // Gated by the same password cookie as the rest of the site. If no Blob store is
 // connected every call throws → 503, and the client falls back to localStorage.
-import { put, get, list } from "@vercel/blob";
+import { put, get, list, del } from "@vercel/blob";
 
 const PASSWORD = process.env.SITE_PASSWORD || "wanderlust";
 // Same token derivation as middleware.js, so a valid site session authorises here.
@@ -25,6 +25,19 @@ async function readJson(pathname) {
 }
 const writeJson = (pathname, value) =>
   put(pathname, JSON.stringify(value), { access: "private", contentType: "application/json", addRandomSuffix: false, allowOverwrite: true });
+
+const HISTORY_KEEP = 10;
+
+// Park a copy of a list that's about to be replaced, and prune the oldest.
+async function snapshot(trip, doc) {
+  if (!doc) return;
+  await writeJson(`packing/history/${trip}/${Date.now()}.json`, doc);
+  try {
+    const { blobs } = await list({ prefix: `packing/history/${trip}/`, limit: 1000 });
+    const extra = blobs.map((b) => b.pathname).sort().slice(0, -HISTORY_KEEP);
+    for (const p of extra) await del(p);
+  } catch { /* pruning is best-effort; never fail a save over it */ }
+}
 
 export default async function handler(req, res) {
   if (!authed(req)) { res.status(401).json({ error: "auth" }); return; }
@@ -44,12 +57,28 @@ export default async function handler(req, res) {
         do {
           const r = await list({ prefix: "packing/", cursor, limit: 1000 });
           for (const b of r.blobs) {
+            // packing/history/<trip>/<ts>.json lives under the same prefix — those
+            // are superseded versions, not trips that have a list.
+            if (b.pathname.startsWith("packing/history/")) continue;
             const n = b.pathname.split("/").pop();
             if (n && n !== "_essentials.json") keys.push(n.replace(/\.json$/, ""));
           }
           cursor = r.cursor;
         } while (cursor);
         res.status(200).json({ keys });
+        return;
+      }
+      // --- superseded versions of one trip's list ---
+      if (q.get("history")) {
+        const t = safe(q.get("history"));
+        const { blobs } = await list({ prefix: `packing/history/${t}/`, limit: 1000 });
+        const versions = [];
+        for (const b of blobs.sort((x, y) => (x.pathname < y.pathname ? 1 : -1)).slice(0, 10)) {
+          const id = b.pathname.split("/").pop().replace(/\.json$/, "");
+          const doc = await readJson(b.pathname);
+          if (doc) versions.push({ id, savedAt: Number(id) || null, generatedAt: doc.generatedAt || null, items: (doc.items || []).length, packed: (doc.items || []).filter((i) => i.packed).length });
+        }
+        res.status(200).json({ versions });
         return;
       }
       // --- one trip's list ---
@@ -66,8 +95,25 @@ export default async function handler(req, res) {
         res.status(200).json({ ok: true });
         return;
       }
+      // Restore a superseded version back over the live one.
+      if (body.restore) {
+        const t = safe(body.restore.trip), v = safe(body.restore.id);
+        const old = await readJson(`packing/history/${t}/${v}.json`);
+        if (!old) { res.status(404).json({ error: "no_version" }); return; }
+        await snapshot(t, await readJson(`packing/${t}.json`));
+        await writeJson(`packing/${t}.json`, old);
+        res.status(200).json({ ok: true, list: old });
+        return;
+      }
       const trip = safe(body.trip);
       if (!trip || !body.list) { res.status(400).json({ error: "bad" }); return; }
+      // A packing list is permanent trip history, and a regenerate replaces the
+      // whole thing. Keep the outgoing copy whenever the incoming list is a
+      // *different generation* — that's the destructive case. Ordinary edits
+      // (ticking an item) share generatedAt and skip this, so the common write
+      // stays a single request.
+      const prev = await readJson(`packing/${trip}.json`);
+      if (prev && prev.generatedAt !== body.list.generatedAt) await snapshot(trip, prev);
       await writeJson(`packing/${trip}.json`, body.list);
       res.status(200).json({ ok: true });
       return;
