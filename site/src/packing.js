@@ -35,7 +35,10 @@ const M = {
   underwear: [0.05, 0.3], socks: [0.05, 0.25], jumper: [0.4, 3.0], fleece: [0.45, 3.0],
   coat: [1.2, 8.0], rainjacket: [0.4, 2.5], shoes: [0.9, 5.0], boots: [1.4, 7.0],
   sandals: [0.35, 2.0], swim: [0.15, 0.5], pyjamas: [0.3, 1.5], hat: [0.1, 1.0],
-  toiletries: [0.15, 0.5], laptop: [1.4, 3.0], charger: [0.15, 0.3], adapter: [0.1, 0.2],
+  // laptop = Dell XPS 13 (Snapdragon), which is genuinely light; its charger is
+  // the small USB-C brick, not the old barrel type.
+  toiletries: [0.15, 0.5], laptop: [1.2, 2.5], laptopcharger: [0.3, 0.5],
+  monitor14: [0.7, 1.8], charger: [0.15, 0.3], adapter: [0.1, 0.2],
   powerbank: [0.25, 0.5], headphones: [0.25, 1.0], book: [0.35, 1.0],
   small: [0.05, 0.1], tiny: [0.02, 0.05],
 };
@@ -119,7 +122,9 @@ const CLIMATE_ITEMS = {
 
 const TYPE_ITEMS = {
   leisure: [["Book / e-reader", "book"], ["Day bag", [0.3, 2.0]], ["Comfortable walking shoes", "shoes", "wearable"]],
-  business: [["Laptop and charger", "laptop", "reach"], ["Suit / smart outfit", [1.0, 6.0]], ["Smart shoes", "shoes", "wearable"], ["Business cards", "tiny"], ["Notebook and pen", [0.2, 0.6]], ["Lanyard / office pass", "tiny", "reach"]],
+  // The laptop itself is in TECH now (it travels on every trip); business adds
+  // the things that only come out for work.
+  business: [["Portable second screen (14\")", "monitor14", "reach"], ["Suit / smart outfit", [1.0, 6.0]], ["Smart shoes", "shoes", "wearable"], ["Business cards", "tiny"], ["Notebook and pen", [0.2, 0.6]], ["Lanyard / office pass", "tiny", "reach"]],
   beach: [["Swimwear", "swim"], ["Beach towel", [0.4, 3.0]], ["Flip flops / sandals", "sandals", "wearable"], ["Aftersun", "toiletries", "liquid"], ["Dry bag", [0.1, 0.5]]],
   hiking: [["Hiking boots", "boots", "wearable"], ["Daypack", [0.6, 3.0]], ["Water bottle / bladder", [0.3, 1.5]], ["Blister plasters", "tiny", "reach"], ["Head torch", [0.15, 0.4]], ["Offline maps downloaded", [0, 0]], ["Snacks", [0.3, 1.5], "reach"]],
   formal: [["Formal outfit", [1.2, 7.0]], ["Dress shoes", "shoes", "wearable"], ["Accessories / jewellery", [0.1, 0.3]], ["Garment bag", [0.3, 1.5]], ["Shoe polish / lint roller", [0.1, 0.4]]],
@@ -141,6 +146,10 @@ const TECH = [
   ["Travel plug adapter", "adapter"],
   ["Power bank", "powerbank", "reach"],   // must be in the cabin by law anyway
   ["Headphones", "headphones", "reach"],
+  // The laptop comes on every trip, not just work ones. A lithium battery that
+  // size has to travel in the cabin anyway, so it's a "reach" item.
+  ["Laptop (XPS 13)", "laptop", "reach"],
+  ["Laptop charger", "laptopcharger", "reach"],
 ];
 
 // Clothing counts default to the number of *nights*, not days — you travel in

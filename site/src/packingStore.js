@@ -47,14 +47,35 @@ function backend() {
 
 // ---------- one-time migration: push on-device lists up to the cloud ----------
 const MIGRATED = "travelmap.packing.migrated.v1";
+
+/**
+ * First time a device reaches the cloud, hand up any lists it made while there
+ * was no backend.
+ *
+ * It ONLY uploads trips the server doesn't already have. Migration used to POST
+ * every local list unconditionally, which meant a device carrying a stale copy
+ * would silently overwrite the good one the moment it first connected — and
+ * because the "already migrated" flag is set only after a successful run, a
+ * device that had never got through was carrying that payload indefinitely.
+ * Genuine offline edits are not this path's job: they go through the pending
+ * queue, which is explicit about overwriting.
+ */
 async function migrate() {
   if (localStorage.getItem(MIGRATED)) return;
   try {
-    for (const [key, list] of Object.entries(localAll())) {
-      await fetch("/api/packing", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ trip: key, list }) });
+    const local = localAll();
+    if (Object.keys(local).length) {
+      const existing = new Set((await (await fetch("/api/packing?keys=1")).json()).keys || []);
+      for (const [key, list] of Object.entries(local)) {
+        if (existing.has(key)) continue;                 // the server's copy wins
+        await pushKey(key, list);
+      }
     }
     const ess = JSON.parse(localStorage.getItem(LOCAL_ESSENTIALS) || "[]");
-    if (ess.length) await fetch("/api/packing", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ essentials: ess }) });
+    const serverEss = (await (await fetch("/api/packing?essentials=1")).json()).essentials || [];
+    if (ess.length && !serverEss.length) {
+      await fetch("/api/packing", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ essentials: ess }) });
+    }
     localStorage.setItem(MIGRATED, "1"); // local copies are kept as a backup
   } catch { /* leave for next load */ }
 }

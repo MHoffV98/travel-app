@@ -52,15 +52,16 @@ export default function PackingList({ trip, onHasList }) {
     setEssentials(e);
     setLoaded(true);
     if (ready) { setClimate(ready.climate); setTripType(ready.tripType); onHasList?.(trip.id, true); }
-    else {
-      setClimate(guessClimate(tripLat(trip), started ? new Date(started).getMonth() : NaN));
-      // No list found — before offering to build one, look for a list that
-      // already existed: the copy this device wrote, and anything the server
-      // kept when a previous list was replaced.
-      const local = localCopy(trip);
-      const versions = await getHistory(trip);
-      if (isLive()) setRecover({ local, versions });
-    }
+    else setClimate(guessClimate(tripLat(trip), started ? new Date(started).getMonth() : NaN));
+
+    // Always look for recoverable copies — the on-device one, and any version the
+    // server kept when a list was replaced. Reads never touch the local copy, so
+    // a device that curated a list still holds it even after something else
+    // overwrote the server's. That difference is worth offering back.
+    const localOne = localCopy(trip);
+    const local = localOne && (!ready || localOne.generatedAt !== ready.generatedAt) ? localOne : null;
+    const versions = await getHistory(trip);
+    if (isLive()) setRecover({ local, versions });
     // Only open on the return leg once there's actually an outbound pack to
     // come home with — a list generated mid-trip should still start outbound.
     if (repackWindow && ready && ready.items.some((i) => i.packed)) setMode("return");
@@ -99,13 +100,19 @@ export default function PackingList({ trip, onHasList }) {
 
   const restoreLocal = async () => {
     setBusy(true);
-    try { await savePackingList(trip, recover.local); setList(ensureMeasures(recover.local)); onHasList?.(trip.id, true); }
-    finally { setBusy(false); }
+    try {
+      await savePackingList(trip, recover.local);
+      setList(ensureMeasures(recover.local));
+      setRecover((r) => ({ ...r, local: null }));   // it's the live list now
+      onHasList?.(trip.id, true);
+    } finally { setBusy(false); }
   };
   const restoreServer = async (id) => {
     setBusy(true);
-    try { const l = await restoreVersion(trip, id); if (l) { setList(ensureMeasures(l)); onHasList?.(trip.id, true); } }
-    finally { setBusy(false); }
+    try {
+      const l = await restoreVersion(trip, id);
+      if (l) { setList(ensureMeasures(l)); setRecover({ local: null, versions: [] }); onHasList?.(trip.id, true); }
+    } finally { setBusy(false); }
   };
 
   const patchItem = (id, p) => persist({ ...list, items: list.items.map((i) => (i.id === id ? { ...i, ...p } : i)) });
@@ -163,7 +170,7 @@ export default function PackingList({ trip, onHasList }) {
   // Generate button here is what let a curated list get replaced by a default one.
   const recovery = (recover.local || recover.versions.length) ? (
     <div className="pk-recover">
-      <b>This trip already had a packing list.</b>
+      <b>{list ? "A different copy of this list exists." : "This trip already had a packing list."}</b>
       <ul>
         {recover.local && (
           <li>
@@ -224,6 +231,8 @@ export default function PackingList({ trip, onHasList }) {
         <b>{done}</b> / {list.items.length} {mode === "return" ? "packed to come home" : "packed"}
         <span className="pk-gen-at"> · list made {new Date(list.generatedAt).toLocaleDateString()} · {list.climate} · {list.tripType}</span>
       </div>
+
+      {recovery}
 
       {offline && (
         <div className="pk-unreachable">
